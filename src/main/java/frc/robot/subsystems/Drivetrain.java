@@ -13,36 +13,36 @@ import edu.wpi.first.math.kinematics.MecanumDriveOdometry;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
 import edu.wpi.first.util.sendable.SendableRegistry;
-import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
-import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
-import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.PhysicalConstants;
-
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.RelativeEncoder;
 
 
 public class Drivetrain extends SubsystemBase {
   //Compbot motor controllers
-  private final CANSparkMax m_frontLeft = new CANSparkMax(DriveConstants.kFrontLeftMotorPort, MotorType.kBrushless);
-  private final CANSparkMax m_rearLeft = new CANSparkMax(DriveConstants.kRearLeftMotorPort, MotorType.kBrushless);
+  //private final CANSparkMax m_frontLeft = new CANSparkMax(DriveConstants.kFrontLeftMotorPort, MotorType.kBrushless);
+  //private final CANSparkMax m_rearLeft = new CANSparkMax(DriveConstants.kRearLeftMotorPort, MotorType.kBrushless);
   //private final CANSparkMax m_frontRight = new CANSparkMax(DriveConstants.kFrontRightMotorPort, MotorType.kBrushless);
   //private final CANSparkMax m_rearRight = new CANSparkMax(DriveConstants.kRearRightMotorPort, MotorType.kBrushless);
 
+  //private MecanumDrive m_drive = new MecanumDrive(m_frontLeft, m_rearLeft, m_frontRight, m_rearRight);
+
+
   //Testbed motor controllers
-  //private final TalonSRX m_frontLeft = new TalonSRX(DriveConstants.kFrontLeftMotorPort);
-  //private final TalonSRX m_rearLeft = new TalonSRX(DriveConstants.kRearLeftMotorPort);
-  private final VictorSPX m_frontRight = new VictorSPX(DriveConstants.kFrontRightMotorPort);
-  private final VictorSPX m_rearRight = new VictorSPX(DriveConstants.kRearRightMotorPort);
+  private final WPI_TalonSRX m_frontLeft = new WPI_TalonSRX(DriveConstants.kFrontLeftMotorPort);
+  private final WPI_TalonSRX m_rearLeft = new WPI_TalonSRX(DriveConstants.kRearLeftMotorPort);
+  private final WPI_VictorSPX m_frontRight = new WPI_VictorSPX(DriveConstants.kFrontRightMotorPort);
+  private final WPI_VictorSPX m_rearRight = new WPI_VictorSPX(DriveConstants.kRearRightMotorPort);
 
   private final MecanumDrive m_drive =
-      new MecanumDrive(m_frontLeft::set, m_rearLeft::set, m_frontRight::set, m_rearRight::set);
+    new MecanumDrive(m_frontLeft::set, m_rearLeft::set, m_frontRight::set, m_rearRight::set);
+
 
 
   //Encooders
@@ -84,6 +84,8 @@ public class Drivetrain extends SubsystemBase {
   // The gyro sensor
   private final AHRS m_gyro = new AHRS();
 
+
+
   // Odometry class for tracking robot pose
   MecanumDriveOdometry m_odometry =
       new MecanumDriveOdometry(
@@ -93,6 +95,16 @@ public class Drivetrain extends SubsystemBase {
 
   /** Creates a new DriveSubsystem. */
   public Drivetrain() {
+    // Calibrate gyro
+      new Thread(() -> {
+        try {
+          Thread.sleep(1000);
+          zeroHeading();
+        } catch (Exception e){
+        }
+      }).start();
+
+
     //Register values for dashboard
     SendableRegistry.addChild(m_drive, m_frontLeft);
     SendableRegistry.addChild(m_drive, m_rearLeft);
@@ -179,7 +191,7 @@ public class Drivetrain extends SubsystemBase {
     }
   }
 
-  /** Sets the front left drive MotorController to a voltage. */
+  /* Sets the front left drive MotorController to a voltage. */
   public void setDriveMotorControllersVolts(MecanumDriveMotorVoltages volts) {
     m_frontLeft.setVoltage(volts.frontLeftVoltage);
     m_rearLeft.setVoltage(volts.rearLeftVoltage);
@@ -187,8 +199,17 @@ public class Drivetrain extends SubsystemBase {
     m_rearRight.setVoltage(volts.rearRightVoltage);
   }
 
+  
+
   /** Resets the drive encoders to currently read a position of 0. */
   public void resetEncoders() {
+    //Compbot
+    //m_frontLeftEncoder.setPosition(0);
+    //m_rearLeftEncoder.setPosition(0);
+    //m_frontRightEncoder.setPosition(0);
+    //m_rearRightEncoder.setPosition(0);
+
+    //Testbed
     m_frontLeftEncoder.reset();
     m_rearLeftEncoder.reset();
     m_frontRightEncoder.reset();
@@ -201,6 +222,10 @@ public class Drivetrain extends SubsystemBase {
    * @return the front left drive encoder
    */
   public Encoder getFrontLeftEncoder() {
+    //Compbot
+    //return m_frontLeftEncoder.getEncoder();
+
+    //Testbed
     return m_frontLeftEncoder;
   }
 
@@ -210,6 +235,10 @@ public class Drivetrain extends SubsystemBase {
    * @return the rear left drive encoder
    */
   public Encoder getRearLeftEncoder() {
+    //Compbot
+    //return m_rearLeftEncoder.getEncoder();
+
+    //Testbed
     return m_rearLeftEncoder;
   }
 
@@ -219,6 +248,10 @@ public class Drivetrain extends SubsystemBase {
    * @return the front right drive encoder
    */
   public Encoder getFrontRightEncoder() {
+    //Compbot
+    //return m_frontRightEncoder.getEncoder();
+
+    //Testbed
     return m_frontRightEncoder;
   }
 
@@ -228,6 +261,10 @@ public class Drivetrain extends SubsystemBase {
    * @return the rear right encoder
    */
   public Encoder getRearRightEncoder() {
+    //Compbot
+    //return m_rearRightEncoder.getEncoder();
+
+    //Testbed
     return m_rearRightEncoder;
   }
 
@@ -238,6 +275,14 @@ public class Drivetrain extends SubsystemBase {
    */
   public MecanumDriveWheelSpeeds getCurrentWheelSpeeds() {
     return new MecanumDriveWheelSpeeds(
+
+        //Compbot
+        //m_frontLeftEncoder.getVelocity(),
+        //m_rearLeftEncoder.getVelocity(),
+        //m_frontRightEncoder.getVelocity(),
+        //m_rearRightEncoder.getVelocity());
+
+        //Testbed
         m_frontLeftEncoder.getRate(),
         m_rearLeftEncoder.getRate(),
         m_frontRightEncoder.getRate(),
@@ -250,6 +295,15 @@ public class Drivetrain extends SubsystemBase {
    * @return the current wheel distance measurements in a MecanumDriveWheelPositions object.
    */
   public MecanumDriveWheelPositions getCurrentWheelDistances() {
+
+    //Compbot
+    //return new MecanumDriveWheelPositions(
+    //    m_frontLeftEncoder.getPosition(),
+    //    m_rearLeftEncoder.getPosition(),
+    //    m_frontRightEncoder.getPosition(),
+    //    m_rearRightEncoder.getPosition());  
+
+    //Testbed
     return new MecanumDriveWheelPositions(
         m_frontLeftEncoder.getDistance(),
         m_rearLeftEncoder.getDistance(),
@@ -288,3 +342,9 @@ public class Drivetrain extends SubsystemBase {
   public double getTurnRate() {
     return -m_gyro.getRate();
   }
+
+  public boolean getFieldRelative() {
+    return m_gyro.isConnected();
+  }
+
+}
