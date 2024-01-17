@@ -8,13 +8,17 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.MecanumDriveMotorVoltages;
 import edu.wpi.first.math.kinematics.MecanumDriveOdometry;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.SendableRegistry;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.PhysicalConstants;
@@ -43,6 +47,7 @@ public class Drivetrain extends SubsystemBase {
   private final MecanumDrive m_drive =
     new MecanumDrive(m_frontLeft::set, m_rearLeft::set, m_frontRight::set, m_rearRight::set);
 
+  private Field2d field = new Field2d();
 
 
   //Encooders
@@ -130,6 +135,18 @@ public class Drivetrain extends SubsystemBase {
     m_frontRight.configFactoryDefault();
     m_rearRight.configFactoryDefault();
 
+    //Compbot break/coast mode
+    //m_frontLeft.setIdleMode(IdleMode.kCoast);
+    //m_rearLeft.setIdleMode(IdleMode.kCoast);
+    //m_frontRight.setIdleMode(IdleMode.kCoast);
+    //m_rearRight.setIdleMode(IdleMode.kCoast);
+
+    //Testbed break/coast mode
+    m_frontLeft.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Coast);
+    m_rearLeft.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Coast);
+    m_frontRight.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Coast);
+    m_rearRight.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Coast);
+
     // Sets the distance per pulse for the encoders
     //Compbot
     //m_frontLeftEncoder.setPositionConversionFactor(PhysicalConstants.kEncoderDistancePerPulse);
@@ -152,9 +169,15 @@ public class Drivetrain extends SubsystemBase {
 
   @Override
   public void periodic() {
+
     // Update the odometry in the periodic block
     m_odometry.update(m_gyro.getRotation2d(), getCurrentWheelDistances());
+
+    // Update the field
+    field.setRobotPose(getPose());
   }
+
+
 
   /**
    * Returns the currently-estimated pose of the robot.
@@ -164,6 +187,42 @@ public class Drivetrain extends SubsystemBase {
   public Pose2d getPose() {
     return m_odometry.getPoseMeters();
   }
+
+  //TODO: update for aprilTag detection of current pose
+
+  public void resetPose(Pose2d pose) {
+    m_odometry.resetPosition(m_gyro.getRotation2d(), getCurrentWheelDistances(), pose);
+  }
+
+  /*  Replace with getCurrentWheelSpeeds()
+
+
+  public ChassisSpeeds getSpeeds() {
+    return kDriveKinematics.toChassisSpeeds(
+        new MecanumDriveWheelSpeeds(
+            m_frontLeftEncoder.getVelocity(),
+            m_rearLeftEncoder.getVelocity(),
+            m_frontRightEncoder.getVelocity(),
+            m_rearRightEncoder.getVelocity()));
+    //return kinematics.toChassisSpeeds(getCurrentWheelSpeeds());
+    );
+  }
+  */
+
+  public void driveFieldRelative(ChassisSpeeds fieldRelativeSpeeds) {
+    driveRobotRelative(ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, getPose().getRotation()));
+  }
+
+  
+  public void driveRobotRelative(ChassisSpeeds robotRelativeSpeeds) {
+    ChassisSpeeds targetSpeeds = ChassisSpeeds.discretize(robotRelativeSpeeds, 0.02);
+
+    MecanumDriveWheelSpeeds targetStates = PhysicalConstants.kDriveKinematics.toWheelSpeeds(targetSpeeds);
+    setSpeeds(targetStates);
+
+  }
+
+
 
   /**
    * Resets the odometry to the specified pose.
@@ -347,4 +406,29 @@ public class Drivetrain extends SubsystemBase {
     return m_gyro.isConnected();
   }
 
+      // Configure AutoBuilder
+    AutoBuilder.configureHolonomic(
+      this::getPose, 
+      this::resetPose, 
+      this::getSpeeds, 
+      this::driveRobotRelative, 
+      Constants.Swerve.pathFollowerConfig,
+      () -> {
+          // Boolean supplier that controls when the path will be mirrored for the red alliance
+          // This will flip the path being followed to the red side of the field.
+          // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+          var alliance = DriverStation.getAlliance();
+          if (alliance.isPresent()) {
+              return alliance.get() == DriverStation.Alliance.Red;
+          }
+          return false;
+      },
+      this
+    );
+
+    // Set up custom logging to add the current path to a field 2d widget
+    PathPlannerLogging.setLogActivePathCallback((poses) -> field.getObject("path").setPoses(poses));
+
+    SmartDashboard.putData("Field", field);
 }
