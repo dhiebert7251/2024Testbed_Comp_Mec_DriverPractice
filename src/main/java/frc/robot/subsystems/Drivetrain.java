@@ -7,13 +7,14 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.MecanumDriveMotorVoltages;
 import edu.wpi.first.math.kinematics.MecanumDriveOdometry;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
@@ -50,7 +51,7 @@ public class Drivetrain extends SubsystemBase {
   private Field2d field = new Field2d();
 
 
-  //Encooders
+  //Encoders
   
     // Compbot encoders
     //private final RelativeEncoder m_frontLeftEncoder; 
@@ -86,6 +87,27 @@ public class Drivetrain extends SubsystemBase {
           DriveConstants.kRearRightEncoderPorts[1],
           DriveConstants.kRearRightEncoderReversed);
 
+  // Wheel PID controllers
+  private final PIDController m_frontLeftPIDController =
+      new PIDController(PhysicalConstants.kPFrontLeft, 
+                        PhysicalConstants.kIFrontLeft,
+                        PhysicalConstants.kDFrontLeft);
+
+  private final PIDController m_rearLeftPIDController = 
+      new PIDController(PhysicalConstants.kPRearLeft, 
+                        PhysicalConstants.kIRearLeft,
+                        PhysicalConstants.kDRearLeft);
+
+  private final PIDController m_frontRightPIDController =
+      new PIDController(PhysicalConstants.kPFrontRight, 
+                        PhysicalConstants.kIFrontRight,
+                        PhysicalConstants.kDFrontRight);
+
+  private final PIDController m_rearRightPIDController =
+      new PIDController(PhysicalConstants.kPRearRight, 
+                        PhysicalConstants.kIRearRight,
+                        PhysicalConstants.kDRearRight);
+
   // The gyro sensor
   private final AHRS m_gyro = new AHRS();
 
@@ -97,6 +119,9 @@ public class Drivetrain extends SubsystemBase {
           PhysicalConstants.kDriveKinematics,
           m_gyro.getRotation2d(),
           new MecanumDriveWheelPositions());
+
+  // The feedforward for the drive TODO: how do you tune this?
+  private final SimpleMotorFeedforward m_feedforward = new SimpleMotorFeedforward(1, 3);
 
   /** Creates a new DriveSubsystem. */
   public Drivetrain() {
@@ -194,20 +219,7 @@ public class Drivetrain extends SubsystemBase {
     m_odometry.resetPosition(m_gyro.getRotation2d(), getCurrentWheelDistances(), pose);
   }
 
-  /*  Replace with getCurrentWheelSpeeds()
-
-
-  public ChassisSpeeds getSpeeds() {
-    return kDriveKinematics.toChassisSpeeds(
-        new MecanumDriveWheelSpeeds(
-            m_frontLeftEncoder.getVelocity(),
-            m_rearLeftEncoder.getVelocity(),
-            m_frontRightEncoder.getVelocity(),
-            m_rearRightEncoder.getVelocity()));
-    //return kinematics.toChassisSpeeds(getCurrentWheelSpeeds());
-    );
-  }
-  */
+ 
 
   public void driveFieldRelative(ChassisSpeeds fieldRelativeSpeeds) {
     driveRobotRelative(ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, getPose().getRotation()));
@@ -233,31 +245,39 @@ public class Drivetrain extends SubsystemBase {
     m_odometry.resetPosition(m_gyro.getRotation2d(), getCurrentWheelDistances(), pose);
   }
 
-  /**
-   * Drives the robot at given x, y and theta speeds. Speeds range from [-1, 1] and the linear
-   * speeds have no effect on the angular speed.
+/**
+   * Method to drive the robot using joystick info.
    *
-   * @param xSpeed Speed of the robot in the x direction (forward/backwards).
+   * @param xSpeed Speed of the robot in the x direction (forward).
    * @param ySpeed Speed of the robot in the y direction (sideways).
    * @param rot Angular rate of the robot.
    * @param fieldRelative Whether the provided x and y speeds are relative to the field.
    */
-  public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
-    if (fieldRelative) {
-      m_drive.driveCartesian(xSpeed, ySpeed, rot, m_gyro.getRotation2d());
-    } else {
-      m_drive.driveCartesian(xSpeed, ySpeed, rot);
-    }
+  public void drive(
+      double xSpeed, double ySpeed, double rot, boolean fieldRelative, double periodSeconds) {
+    var mecanumDriveWheelSpeeds =
+        PhysicalConstants.kDriveKinematics.toWheelSpeeds(
+            ChassisSpeeds.discretize(
+                fieldRelative
+                    ? ChassisSpeeds.fromFieldRelativeSpeeds(
+                        xSpeed, ySpeed, rot, m_gyro.getRotation2d())
+                    : new ChassisSpeeds(xSpeed, ySpeed, rot),
+                periodSeconds));
+    mecanumDriveWheelSpeeds.desaturate(PhysicalConstants.kMaxVelocity);
+    setSpeeds(mecanumDriveWheelSpeeds);
   }
 
+
+
   /* Sets the front left drive MotorController to a voltage. */
+  /*
   public void setDriveMotorControllersVolts(MecanumDriveMotorVoltages volts) {
     m_frontLeft.setVoltage(volts.frontLeftVoltage);
     m_rearLeft.setVoltage(volts.rearLeftVoltage);
     m_frontRight.setVoltage(volts.frontRightVoltage);
     m_rearRight.setVoltage(volts.rearRightVoltage);
   }
-
+*/
   
 
   /** Resets the drive encoders to currently read a position of 0. */
@@ -362,6 +382,7 @@ public class Drivetrain extends SubsystemBase {
     //    m_frontRightEncoder.getPosition(),
     //    m_rearRightEncoder.getPosition());  
 
+
     //Testbed
     return new MecanumDriveWheelPositions(
         m_frontLeftEncoder.getDistance(),
@@ -369,6 +390,39 @@ public class Drivetrain extends SubsystemBase {
         m_frontRightEncoder.getDistance(),
         m_rearRightEncoder.getDistance());
   }
+
+  /**
+   * Set the desired speeds for each wheel.
+   *
+   * @param speeds The desired wheel speeds.
+   */
+  public void setSpeeds(MecanumDriveWheelSpeeds speeds) {
+    final double frontLeftFeedforward = m_feedforward.calculate(speeds.frontLeftMetersPerSecond);
+    final double frontRightFeedforward = m_feedforward.calculate(speeds.frontRightMetersPerSecond);
+    final double backLeftFeedforward = m_feedforward.calculate(speeds.rearLeftMetersPerSecond);
+    final double backRightFeedforward = m_feedforward.calculate(speeds.rearRightMetersPerSecond);
+
+    final double frontLeftOutput =
+        m_frontLeftPIDController.calculate(
+            m_frontLeftEncoder.getRate(), speeds.frontLeftMetersPerSecond);
+    final double frontRightOutput =
+        m_frontRightPIDController.calculate(
+            m_frontRightEncoder.getRate(), speeds.frontRightMetersPerSecond);
+    final double backLeftOutput =
+        m_rearLeftPIDController.calculate(
+            m_rearLeftEncoder.getRate(), speeds.rearLeftMetersPerSecond);
+    final double backRightOutput =
+        m_rearRightPIDController.calculate(
+            m_rearRightEncoder.getRate(), speeds.rearRightMetersPerSecond);
+
+    m_frontLeft.setVoltage(frontLeftOutput + frontLeftFeedforward);
+    m_frontRight.setVoltage(frontRightOutput + frontRightFeedforward);
+    m_rearLeft.setVoltage(backLeftOutput + backLeftFeedforward);
+    m_rearRight.setVoltage(backRightOutput + backRightFeedforward);
+  }
+
+
+
 
   /**
    * Sets the max output of the drive. Useful for scaling the drive to drive more slowly.
@@ -405,13 +459,13 @@ public class Drivetrain extends SubsystemBase {
   public boolean getFieldRelative() {
     return m_gyro.isConnected();
   }
-
+/*
       // Configure AutoBuilder
     AutoBuilder.configureHolonomic(
       this::getPose, 
       this::resetPose, 
       this::getSpeeds, 
-      this::driveRobotRelative, 
+      this::drive, 
       Constants.Swerve.pathFollowerConfig,
       () -> {
           // Boolean supplier that controls when the path will be mirrored for the red alliance
@@ -426,9 +480,12 @@ public class Drivetrain extends SubsystemBase {
       },
       this
     );
+*/
 
+/*
     // Set up custom logging to add the current path to a field 2d widget
     PathPlannerLogging.setLogActivePathCallback((poses) -> field.getObject("path").setPoses(poses));
 
     SmartDashboard.putData("Field", field);
+    */
 }

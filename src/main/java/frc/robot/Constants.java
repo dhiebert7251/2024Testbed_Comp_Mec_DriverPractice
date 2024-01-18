@@ -97,8 +97,8 @@ public final class Constants {
     public static final double kMaxAcceleration = 1.5; //meters per second squared TODO: tune this
 
     // Max angular velocity
-    public static final double kMaxAngularVelocity = Math.PI; //radians per second
-
+    public static final double kMaxAngularVelocity = Math.PI; //radians per second --- 1/2 rotation per second TODO: tune this
+    
     // Max angular acceleration
     public static final double kMaxAngularAcceleration = Math.PI; //radians per second squared
 
@@ -114,35 +114,20 @@ public final class Constants {
         new SimpleMotorFeedforward(1, 0.8, 0.15);
 
     // Example value only - as above, this must be tuned for your drive!
-    public static final double kPFrontLeftVel = 0.5;
-    public static final double kPRearLeftVel = 0.5;
-    public static final double kPFrontRightVel = 0.5;
-    public static final double kPRearRightVel = 0.5;
+    public static final double kPFrontLeft = 0.5;
+    public static final double kPRearLeft = 0.5;
+    public static final double kPFrontRight = 0.5;
+    public static final double kPRearRight = 0.5;
 
-    public static final double kPFrontLeftPos = 0.5;
-    public static final double kPRearLeftPos = 0.5;
-    public static final double kPFrontRightPos = 0.5;
-    public static final double kPRearRightPos = 0.5;
+    public static final double kIFrontLeft = 0;
+    public static final double kIRearLeft = 0;
+    public static final double kIFrontRight = 0;
+    public static final double kIRearRight = 0;
 
-    public static final double kIFrontLeftVel = 0;
-    public static final double kIRearLeftVel = 0;
-    public static final double kIFrontRightVel = 0;
-    public static final double kIRearRightVel = 0;
-
-    public static final double kIFrontLeftPos = 0;
-    public static final double kIRearLeftPos = 0;
-    public static final double kIFrontRightPos = 0;
-    public static final double kIRearRightPos = 0;
-
-    public static final double kDFrontLeftVel = 0;
-    public static final double kDRearLeftVel = 0;
-    public static final double kDFrontRightVel = 0;
-    public static final double kDRearRightVel = 0;
-
-    public static final double kDFrontLeftPos = 0;
-    public static final double kDRearLeftPos = 0;
-    public static final double kDFrontRightPos = 0;
-    public static final double kDRearRightPos = 0;
+    public static final double kDFrontLeft = 0;
+    public static final double kDRearLeft = 0;
+    public static final double kDFrontRight = 0;
+    public static final double kDRearRight = 0;
 
 
   }
