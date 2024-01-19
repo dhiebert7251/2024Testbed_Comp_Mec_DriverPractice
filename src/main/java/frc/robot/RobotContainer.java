@@ -13,7 +13,6 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.Drivetrain;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 
 //import java.util.List;
 
@@ -51,6 +50,12 @@ public class RobotContainer {
   private final Drivetrain m_robotDrive = new Drivetrain();
 
   private final SendableChooser<Command> autoChooser;
+
+  // Register Named Commands TODO: add any commands here
+  //NamedCommands.registerCommand("autoBalance", swerve.autoBalanceCommand());
+  //NamedCommands.registerCommand("exampleCommand", exampleSubsystem.exampleCommand());
+  //NamedCommands.registerCommand("someOtherCommand", new SomeOtherCommand());
+  
 
   // The driver's controller
   XboxController m_driverController = new XboxController(OperatorConstants.kDriverControllerPort);
