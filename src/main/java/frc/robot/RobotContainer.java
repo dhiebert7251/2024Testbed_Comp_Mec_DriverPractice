@@ -12,6 +12,8 @@ import frc.robot.Constants.OperatorConstants;
 //import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.Drivetrain;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 
 //import java.util.List;
 
@@ -25,6 +27,8 @@ import frc.robot.subsystems.Drivetrain;
 //import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 //import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -33,6 +37,8 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 //import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 //import edu.wpi.first.wpilibj2.command.button.Trigger;
+
+
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -43,6 +49,8 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 public class RobotContainer {
   // The robot's subsystems
   private final Drivetrain m_robotDrive = new Drivetrain();
+
+  private final SendableChooser<Command> autoChooser;
 
   // The driver's controller
   XboxController m_driverController = new XboxController(OperatorConstants.kDriverControllerPort);
@@ -64,8 +72,12 @@ public class RobotContainer {
                     -m_driverController.getRightX(),
                     -m_driverController.getLeftX(),
                     m_robotDrive.getFieldRelative(),
-                    0.01),
+                    0.02),
             m_robotDrive));
+
+    autoChooser = AutoBuilder.buildAutoChooser();
+    SmartDashboard.putData("Auto Chooser", autoChooser);
+
   }
 
   /**
@@ -89,8 +101,7 @@ public class RobotContainer {
 
     
   public Command getAutonomousCommand() {
-    // An ExampleCommand will run in autonomous
-    return null;
+    return autoChooser.getSelected();
   }
 /*
   public Command getAutonomousCommand() {
