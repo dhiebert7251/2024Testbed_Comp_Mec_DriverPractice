@@ -36,8 +36,8 @@ public class Drivetrain extends SubsystemBase {
 
   //Testbed motor controllers
   private final WPI_TalonSRX m_frontLeft = new WPI_TalonSRX(DriveConstants.kFrontLeftMotorPort);
-  private final WPI_TalonSRX m_rearLeft = new WPI_TalonSRX(DriveConstants.kRearLeftMotorPort);
-  private final WPI_VictorSPX m_frontRight = new WPI_VictorSPX(DriveConstants.kFrontRightMotorPort);
+  private final WPI_VictorSPX m_rearLeft = new WPI_VictorSPX(DriveConstants.kRearLeftMotorPort);
+  private final WPI_TalonSRX m_frontRight = new WPI_TalonSRX(DriveConstants.kFrontRightMotorPort);
   private final WPI_VictorSPX m_rearRight = new WPI_VictorSPX(DriveConstants.kRearRightMotorPort);
 
   private final MecanumDrive m_drive =
