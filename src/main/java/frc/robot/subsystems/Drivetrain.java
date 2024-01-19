@@ -16,17 +16,23 @@ import edu.wpi.first.math.kinematics.MecanumDriveOdometry;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
 import edu.wpi.first.util.sendable.SendableRegistry;
-//import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.PhysicalConstants;
+import frc.robot.Constants.AutoConstants;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
 //import com.revrobotics.RelativeEncoder;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
 
 
 public class Drivetrain extends SubsystemBase {
@@ -190,6 +196,33 @@ public class Drivetrain extends SubsystemBase {
     m_rearLeft.setInverted(DriveConstants.kRearLeftMotorReversed);
     m_frontRight.setInverted(DriveConstants.kFrontRightMotorReversed);
     m_rearRight.setInverted(DriveConstants.kRearRightMotorReversed);
+
+
+    
+    // Configure AutoBuilder
+    AutoBuilder.configureHolonomic(
+      this::getPose, 
+      this::resetPose, 
+      this::getChassisSpeeds, 
+      this::driveFieldRelative, 
+      AutoConstants.kPathFollowerConfig,
+      () -> {
+        // Boolean supplier that controls when the path will be mirrored for the red alliance
+        // This will flip the path being followed to the red side of the field.
+        // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+        var alliance = DriverStation.getAlliance();
+        if (alliance.isPresent()) {
+            return alliance.get() == DriverStation.Alliance.Red;
+        }
+
+        return false;
+      },
+      this
+    );
+    
+
+    
   }
 
   @Override
@@ -254,17 +287,17 @@ public class Drivetrain extends SubsystemBase {
    * @param fieldRelative Whether the provided x and y speeds are relative to the field.
    */
   public void drive(
-      double xSpeed, double ySpeed, double rot, boolean fieldRelative, double periodSeconds) {
-    var mecanumDriveWheelSpeeds =
-        PhysicalConstants.kDriveKinematics.toWheelSpeeds(
-            ChassisSpeeds.discretize(
-                fieldRelative
-                    ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                        xSpeed, ySpeed, rot, m_gyro.getRotation2d())
-                    : new ChassisSpeeds(xSpeed, ySpeed, rot),
-                periodSeconds));
-    mecanumDriveWheelSpeeds.desaturate(PhysicalConstants.kMaxVelocity);
-    setSpeeds(mecanumDriveWheelSpeeds);
+    double xSpeed, double ySpeed, double rot, boolean fieldRelative, double periodSeconds) {
+      var mecanumDriveWheelSpeeds =
+          PhysicalConstants.kDriveKinematics.toWheelSpeeds(
+             ChassisSpeeds.discretize(
+                  fieldRelative
+                      ? ChassisSpeeds.fromFieldRelativeSpeeds(
+                          xSpeed, ySpeed, rot, m_gyro.getRotation2d())
+                      : new ChassisSpeeds(xSpeed, ySpeed, rot),
+                  periodSeconds));
+      mecanumDriveWheelSpeeds.desaturate(PhysicalConstants.kMaxVelocity);
+      setSpeeds(mecanumDriveWheelSpeeds);
   }
 
 
@@ -421,6 +454,11 @@ public class Drivetrain extends SubsystemBase {
     m_rearRight.setVoltage(backRightOutput + backRightFeedforward);
   }
 
+  public ChassisSpeeds getChassisSpeeds(){
+    // Convert to chassis speeds
+    ChassisSpeeds chassisSpeeds = PhysicalConstants.kDriveKinematics.toChassisSpeeds(getCurrentWheelSpeeds());
+    return chassisSpeeds;
+  }
 
 
 
@@ -459,28 +497,7 @@ public class Drivetrain extends SubsystemBase {
   public boolean getFieldRelative() {
     return m_gyro.isConnected();
   }
-/*
-      // Configure AutoBuilder
-    AutoBuilder.configureHolonomic(
-      this::getPose, 
-      this::resetPose, 
-      this::getSpeeds, 
-      this::drive, 
-      Constants.Swerve.pathFollowerConfig,
-      () -> {
-          // Boolean supplier that controls when the path will be mirrored for the red alliance
-          // This will flip the path being followed to the red side of the field.
-          // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
 
-          var alliance = DriverStation.getAlliance();
-          if (alliance.isPresent()) {
-              return alliance.get() == DriverStation.Alliance.Red;
-          }
-          return false;
-      },
-      this
-    );
-*/
 
 /*
     // Set up custom logging to add the current path to a field 2d widget
