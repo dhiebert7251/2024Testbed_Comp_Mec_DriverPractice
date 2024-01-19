@@ -6,8 +6,7 @@ package frc.robot;
 
 //import frc.robot.Constants.AutoConstants;
 //import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.OIConstants;
-//import frc.robot.Constants.OperatorConstants;
+import frc.robot.Constants.OperatorConstants;
 //import frc.robot.Constants.PhysicalConstants;
 //import frc.robot.commands.Autos;
 //import frc.robot.commands.ExampleCommand;
@@ -46,7 +45,7 @@ public class RobotContainer {
   private final Drivetrain m_robotDrive = new Drivetrain();
 
   // The driver's controller
-  XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
+  XboxController m_driverController = new XboxController(OperatorConstants.kDriverControllerPort);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
