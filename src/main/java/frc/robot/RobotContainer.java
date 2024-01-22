@@ -7,6 +7,7 @@ package frc.robot;
 //import frc.robot.Constants.AutoConstants;
 //import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.turnToAngleCommand;
 //import frc.robot.Constants.PhysicalConstants;
 //import frc.robot.commands.Autos;
 //import frc.robot.commands.ExampleCommand;
@@ -36,6 +37,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 //import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 //import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
 
 
 
@@ -70,15 +72,25 @@ public class RobotContainer {
     m_robotDrive.setDefaultCommand(
         // A split-stick arcade command, with forward/backward controlled by the left
         // hand, and turning controlled by the right.
-        new RunCommand(
-            () ->
+      /*  new RunCommand(
+            () -> {
+                m_robotDrive.setManualRotationInput(-m_driverController.getRightX());
                 m_robotDrive.drive(
                     -m_driverController.getLeftY(),
                     -m_driverController.getRightX(),
                     -m_driverController.getLeftX(),
                     m_robotDrive.getFieldRelative(),
-                    0.02),
+                    0.02);
+            },
             m_robotDrive));
+      */
+      new RunCommand(
+        () -> {
+            m_robotDrive.setTranslation(-m_driverController.getLeftY(), -m_driverController.getLeftX());
+            m_robotDrive.setManualRotationInput(-m_driverController.getRightX());
+            // Note: The actual driving is handled in the Drivetrain's periodic method
+        },
+        m_robotDrive));
 
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
@@ -96,6 +108,25 @@ public class RobotContainer {
     new JoystickButton(m_driverController, Button.kRightBumper.value)
         .onTrue(new InstantCommand(() -> m_robotDrive.setMaxOutput(0.5)))
         .onFalse(new InstantCommand(() -> m_robotDrive.setMaxOutput(1)));
+
+    // Bind the D-pad (POV hat) to the TurnToAngleCommand
+    new POVButton(m_driverController, 0)
+        .onTrue(new turnToAngleCommand(m_robotDrive, 0));  // 0 degrees
+    new POVButton(m_driverController, 45)
+        .onTrue(new turnToAngleCommand(m_robotDrive, 45)); // 45 degrees
+    new POVButton(m_driverController, 90)
+        .onTrue(new turnToAngleCommand(m_robotDrive, 90)); // 90 degrees
+    new POVButton(m_driverController, 135)
+        .onTrue(new turnToAngleCommand(m_robotDrive, 135)); // 135 degrees
+    new POVButton(m_driverController, 180)
+        .onTrue(new turnToAngleCommand(m_robotDrive, 180)); // 180 degrees
+    new POVButton(m_driverController, 225)
+        .onTrue(new turnToAngleCommand(m_robotDrive, 225)); // 225 degrees
+    new POVButton(m_driverController, 270)
+        .onTrue(new turnToAngleCommand(m_robotDrive, 270)); // 270 degrees
+    new POVButton(m_driverController, 315)
+        .onTrue(new turnToAngleCommand(m_robotDrive, 315)); // 315 degrees
+   
   }
 
   /**

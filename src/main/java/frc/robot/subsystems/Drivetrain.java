@@ -18,6 +18,7 @@ import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -52,6 +53,17 @@ public class Drivetrain extends SubsystemBase {
     new MecanumDrive(m_frontLeft::set, m_rearLeft::set, m_frontRight::set, m_rearRight::set);
 
   private Field2d field = new Field2d();
+
+  // PID controller for rotation
+  private PIDController turnController;
+
+  private boolean isTurningToAngle = false;
+  private double manualRotationInput = 0;
+
+  private double xTranslation = 0;
+  private double yTranslation = 0;
+  private double currentRotationRate = 0;
+
 
 
   //Encoders
@@ -218,18 +230,26 @@ public class Drivetrain extends SubsystemBase {
       this
     );
     
+    // Initialize turn PIDController here 
+    turnController = new PIDController(AutoConstants.kPRotation, AutoConstants.kIRotation, AutoConstants.kDRotation);
 
+    // Set the PIDController tolerance
+    turnController.setTolerance(AutoConstants.kToleranceDegrees);
     
   }
 
   @Override
   public void periodic() {
+    double rotationRate = isTurningToAngle ? currentRotationRate : manualRotationInput;
+    drive(getXTranslation(), getYTranslation(), rotationRate, getFieldRelative(), 0.02);
 
     // Update the odometry in the periodic block
     m_odometry.update(m_gyro.getRotation2d(), getCurrentWheelDistances());
 
     // Update the field
     field.setRobotPose(getPose());
+
+
   }
 
 
@@ -502,4 +522,54 @@ public class Drivetrain extends SubsystemBase {
 
     SmartDashboard.putData("Field", field);
     */
+
+  // Method to turn the robot to a specific angle
+  public void turnToAngle(double targetAngleDegrees) {
+    turnController.setSetpoint(targetAngleDegrees);
+    double turnRate = -turnController.calculate(m_gyro.getAngle());
+
+    drive(turnRate, turnRate, targetAngleDegrees, getFieldRelative(), turnRate);
+        
+    // Code to turn the robot at the turnRate speed
+    // Example: drive(0, 0, turnRate);
+    // You'll need to replace this with your own drive code
+  }
+
+  // Method to check if the turn is complete
+  public boolean atTargetAngle() {
+      return turnController.atSetpoint();
+  }
+
+  public void setManualRotationInput(double rotation) {
+    this.manualRotationInput = rotation;
+  }
+
+  public void enableTurnToAngleMode() {
+    this.isTurningToAngle = true;
+  }
+
+  public void disableTurnToAngleMode() {
+    this.isTurningToAngle = false;
+    setCurrentRotationRate(0); // Stop turning when we disable the mode
+  }
+
+  // Method to set the current rotation rate
+  public void setCurrentRotationRate(double rate) {
+    this.currentRotationRate = rate;
+  }
+
+  // Method to set the current translation values
+  public void setTranslation(double x, double y) {
+    this.xTranslation = x;
+    this.yTranslation = y;
+  }
+
+  // Methods to get the current translation values
+  public double getXTranslation() {
+    return xTranslation;
+  }
+
+  public double getYTranslation() {
+    return yTranslation;
+  }
 }

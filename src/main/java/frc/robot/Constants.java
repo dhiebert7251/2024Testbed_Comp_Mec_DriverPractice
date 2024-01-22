@@ -166,6 +166,8 @@ public final class Constants {
     public static final double kIRotation = 0;
     public static final double kDRotation = 0;
 
+    public static final double kToleranceDegrees = 2.0f;
+
 
     // Constraint for the motion profilied robot angle controller
     public static final TrapezoidProfile.Constraints kThetaControllerConstraints =
