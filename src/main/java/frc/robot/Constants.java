@@ -182,9 +182,17 @@ public final class Constants {
       new ReplanningConfig()
     );
 
+  }
 
+    
 
+  public static final class VisionConstants {
+    public static final String kCameraName = "PhotonVision"; //TODO: update this
+    public static final double kCameraHeight = 0.5; //meters TODO: update this
 
+  }
+
+  public static final class FieldConstants {
 
   }
 }
