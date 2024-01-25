@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.PhysicalConstants;
@@ -230,6 +231,8 @@ public class Drivetrain extends SubsystemBase {
 
     // Update the field
     field.setRobotPose(getPose());
+
+    showTelemetry();
   }
 
 
@@ -295,6 +298,11 @@ public class Drivetrain extends SubsystemBase {
                   periodSeconds));
       mecanumDriveWheelSpeeds.desaturate(PhysicalConstants.kMaxVelocity);
       setSpeeds(mecanumDriveWheelSpeeds);
+
+      SmartDashboard.putNumber("Joy1 X", xSpeed);
+      SmartDashboard.putNumber("Joy1 Y", ySpeed);
+      SmartDashboard.putNumber("Joy2 X", rot);
+
   }
 
 
@@ -383,6 +391,11 @@ public class Drivetrain extends SubsystemBase {
    * @return the current wheel speeds in a MecanumDriveWheelSpeeds object.
    */
   public MecanumDriveWheelSpeeds getCurrentWheelSpeeds() {
+    SmartDashboard.putNumber("FL Encoder Rate", m_frontLeftEncoder.getRate());
+    SmartDashboard.putNumber("RL Encoder Rate", m_rearLeftEncoder.getRate());
+    SmartDashboard.putNumber("FR Encoder Rate", m_frontRightEncoder.getRate());
+    SmartDashboard.putNumber("RR Encoder Rate", m_rearRightEncoder.getRate());
+
     return new MecanumDriveWheelSpeeds(
 
         //Compbot
@@ -396,6 +409,8 @@ public class Drivetrain extends SubsystemBase {
         m_rearLeftEncoder.getRate(),
         m_frontRightEncoder.getRate(),
         m_rearRightEncoder.getRate());
+
+
   }
 
   /**
@@ -404,7 +419,10 @@ public class Drivetrain extends SubsystemBase {
    * @return the current wheel distance measurements in a MecanumDriveWheelPositions object.
    */
   public MecanumDriveWheelPositions getCurrentWheelDistances() {
-
+    SmartDashboard.putNumber("FL Encoder Distance", m_frontLeftEncoder.getDistance());
+    SmartDashboard.putNumber("RL Encoder Distance", m_rearLeftEncoder.getDistance());
+    SmartDashboard.putNumber("FR Encoder Distance", m_frontRightEncoder.getDistance());
+    SmartDashboard.putNumber("RR Encoder Distance", m_rearRightEncoder.getDistance());
     //Compbot
     //return new MecanumDriveWheelPositions(
     //    m_frontLeftEncoder.getPosition(),
@@ -449,6 +467,11 @@ public class Drivetrain extends SubsystemBase {
     m_frontRight.setVoltage(frontRightOutput + frontRightFeedforward);
     m_rearLeft.setVoltage(backLeftOutput + backLeftFeedforward);
     m_rearRight.setVoltage(backRightOutput + backRightFeedforward);
+
+    SmartDashboard.putNumber("FL Voltage", m_frontLeft.getMotorOutputVoltage());
+    SmartDashboard.putNumber("RL Voltage", m_rearLeft.getMotorOutputVoltage());    
+    SmartDashboard.putNumber("FR Voltage", m_frontRight.getMotorOutputVoltage());    
+    SmartDashboard.putNumber("RR Voltage", m_rearRight.getMotorOutputVoltage());
   }
 
   public ChassisSpeeds getChassisSpeeds(){
@@ -502,4 +525,16 @@ public class Drivetrain extends SubsystemBase {
 
     SmartDashboard.putData("Field", field);
     */
+
+  public void showTelemetry(){
+    SmartDashboard.putNumber("Heading", getHeading());
+    SmartDashboard.putNumber("Turn Rate", getTurnRate());
+    SmartDashboard.putBoolean("Field Relative", getFieldRelative());
+
+    SmartDashboard.putNumber("FL Encoder Position", m_frontLeftEncoder.getRaw());
+    SmartDashboard.putNumber("RL Encoder Position", m_rearLeftEncoder.getRaw());
+    SmartDashboard.putNumber("FR Encoder Position", m_frontRightEncoder.getRaw());
+    SmartDashboard.putNumber("RR Encoder Position", m_rearRightEncoder.getRaw());
+    
+  }
 }
