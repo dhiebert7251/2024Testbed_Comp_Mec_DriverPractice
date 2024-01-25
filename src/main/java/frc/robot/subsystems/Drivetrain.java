@@ -18,6 +18,8 @@ import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -32,6 +34,9 @@ import com.pathplanner.lib.auto.AutoBuilder;
 
 
 public class Drivetrain extends SubsystemBase {
+
+  ShuffleboardTab driveTab = Shuffleboard.getTab("Drivetrain Data");
+
 
   //Testbed motor controllers
   private final WPI_TalonSRX m_frontLeft = new WPI_TalonSRX(DriveConstants.kFrontLeftMotorPort);
@@ -327,10 +332,7 @@ public class Drivetrain extends SubsystemBase {
    * @return the current wheel speeds in a MecanumDriveWheelSpeeds object.
    */
   public MecanumDriveWheelSpeeds getCurrentWheelSpeeds() {
-    SmartDashboard.putNumber("FL Encoder Rate", m_frontLeftEncoder.getRate());
-    SmartDashboard.putNumber("RL Encoder Rate", m_rearLeftEncoder.getRate());
-    SmartDashboard.putNumber("FR Encoder Rate", m_frontRightEncoder.getRate());
-    SmartDashboard.putNumber("RR Encoder Rate", m_rearRightEncoder.getRate());
+
 
     return new MecanumDriveWheelSpeeds(
 
@@ -349,10 +351,7 @@ public class Drivetrain extends SubsystemBase {
    * @return the current wheel distance measurements in a MecanumDriveWheelPositions object.
    */
   public MecanumDriveWheelPositions getCurrentWheelDistances() {
-    SmartDashboard.putNumber("FL Encoder Distance", m_frontLeftEncoder.getDistance());
-    SmartDashboard.putNumber("RL Encoder Distance", m_rearLeftEncoder.getDistance());
-    SmartDashboard.putNumber("FR Encoder Distance", m_frontRightEncoder.getDistance());
-    SmartDashboard.putNumber("RR Encoder Distance", m_rearRightEncoder.getDistance());
+
 
     //Testbed
     return new MecanumDriveWheelPositions(
@@ -390,12 +389,8 @@ public class Drivetrain extends SubsystemBase {
     m_frontRight.setVoltage(frontRightOutput + frontRightFeedforward);
     m_rearLeft.setVoltage(backLeftOutput + backLeftFeedforward);
     m_rearRight.setVoltage(backRightOutput + backRightFeedforward);
-
-    SmartDashboard.putNumber("FL Voltage", m_frontLeft.getMotorOutputVoltage());
-    SmartDashboard.putNumber("RL Voltage", m_rearLeft.getMotorOutputVoltage());    
-    SmartDashboard.putNumber("FR Voltage", m_frontRight.getMotorOutputVoltage());    
-    SmartDashboard.putNumber("RR Voltage", m_rearRight.getMotorOutputVoltage());
   }
+
 
   public ChassisSpeeds getChassisSpeeds(){
     // Convert to chassis speeds
@@ -450,14 +445,31 @@ public class Drivetrain extends SubsystemBase {
     */
 
   public void showTelemetry(){
-    SmartDashboard.putNumber("Heading", getHeading());
-    SmartDashboard.putNumber("Turn Rate", getTurnRate());
-    SmartDashboard.putBoolean("Field Relative", getFieldRelative());
 
-    SmartDashboard.putNumber("FL Encoder Position", m_frontLeftEncoder.getRaw());
-    SmartDashboard.putNumber("RL Encoder Position", m_rearLeftEncoder.getRaw());
-    SmartDashboard.putNumber("FR Encoder Position", m_frontRightEncoder.getRaw());
-    SmartDashboard.putNumber("RR Encoder Position", m_rearRightEncoder.getRaw());
+    driveTab.add("Heading", getHeading());
     
+    driveTab.add("Turn Rate", getTurnRate());
+    driveTab.add("Field Relative", getFieldRelative());
+
+    driveTab.add("FL Encoder Position", m_frontLeftEncoder.getRaw());
+    driveTab.add("RL Encoder Position", m_rearLeftEncoder.getRaw());
+    driveTab.add("FR Encoder Position", m_frontRightEncoder.getRaw());
+    driveTab.add("RR Encoder Position", m_rearRightEncoder.getRaw());
+
+    driveTab.add("FL Encoder Distance", m_frontLeftEncoder.getDistance());
+    driveTab.add("RL Encoder Distance", m_rearLeftEncoder.getDistance());
+    driveTab.add("FR Encoder Distance", m_frontRightEncoder.getDistance());
+    driveTab.add("RR Encoder Distance", m_rearRightEncoder.getDistance());
+    
+    driveTab.add("FL Voltage", m_frontLeft.getMotorOutputVoltage());
+    driveTab.add("RL Voltage", m_rearLeft.getMotorOutputVoltage());    
+    driveTab.add("FR Voltage", m_frontRight.getMotorOutputVoltage());    
+    driveTab.add("RR Voltage", m_rearRight.getMotorOutputVoltage());
+
+    driveTab.add("FL Encoder Rate", m_frontLeftEncoder.getRate());
+    driveTab.add("RL Encoder Rate", m_rearLeftEncoder.getRate());
+    driveTab.add("FR Encoder Rate", m_frontRightEncoder.getRate());
+    driveTab.add("RR Encoder Rate", m_rearRightEncoder.getRate());
+  
   }
 }
