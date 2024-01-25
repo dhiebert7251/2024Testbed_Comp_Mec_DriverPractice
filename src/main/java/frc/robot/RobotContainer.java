@@ -75,10 +75,10 @@ public class RobotContainer {
             () ->
                 m_robotDrive.drive(
                     -m_driverController.getLeftY(),
-                    -m_driverController.getRightX(),
                     -m_driverController.getLeftX(),
+                    -m_driverController.getRightX(),
                     m_robotDrive.getFieldRelative(),
-                    0.01), //should this be 0.02?
+                    0.02), //should this be 0.02?
             m_robotDrive)
             );
 

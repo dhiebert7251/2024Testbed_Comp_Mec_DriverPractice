@@ -14,6 +14,9 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.MecanumDriveOdometry;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
+import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
@@ -26,6 +29,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.PhysicalConstants;
 import frc.robot.Constants.AutoConstants;
+
+import java.time.Instant;
+
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
@@ -34,9 +40,37 @@ import com.pathplanner.lib.auto.AutoBuilder;
 
 
 public class Drivetrain extends SubsystemBase {
+    // Shuffleboard
+    private final ShuffleboardTab driveTab = Shuffleboard.getTab("Drivetrain Data");
+    private GenericEntry headingEntry;
+    private GenericEntry turnRateEntry;
+    private GenericEntry fieldRelativeEntry;
 
-  ShuffleboardTab driveTab = Shuffleboard.getTab("Drivetrain Data");
+    private GenericEntry FLRateEntry;
+    private GenericEntry RLRateEntry;
+    private GenericEntry FRRateEntry;
+    private GenericEntry RRRateEntry;
 
+    private GenericEntry FLDistanceEntry;
+    private GenericEntry RLDistanceEntry;
+    private GenericEntry FRDistanceEntry;
+    private GenericEntry RRDistanceEntry;
+
+    private GenericEntry FLPositionEntry;
+    private GenericEntry RLPositionEntry;
+    private GenericEntry FRPositionEntry;
+    private GenericEntry RRPositionEntry;
+
+    private GenericEntry FLVoltageEntry;
+    private GenericEntry RLVoltageEntry;
+    private GenericEntry FRVoltageEntry;
+    private GenericEntry RRVoltageEntry;
+
+
+  
+  public void log(String message) {
+    System.out.println(Instant.now() + ": " + message);
+  }
 
   //Testbed motor controllers
   private final WPI_TalonSRX m_frontLeft = new WPI_TalonSRX(DriveConstants.kFrontLeftMotorPort);
@@ -135,6 +169,35 @@ public class Drivetrain extends SubsystemBase {
     SendableRegistry.addChild(m_drive, m_frontRight);
     SendableRegistry.addChild(m_drive, m_rearRight);
     //TODO: add other sensors? (encoders, gyro, etc.)
+
+    // Initialize Shuffleboard widgets
+    headingEntry = driveTab.add("Heading", 0).withWidget("Gyro").withPosition(0, 0).withSize(2, 2).getEntry();
+    turnRateEntry = driveTab.add("Turn Rate", 0).withWidget("Dial").withPosition(2, 0).withSize(2, 2).getEntry();
+    fieldRelativeEntry = driveTab.add("Field Relative", false).withWidget("Boolean Box").withPosition(4, 0).withSize(1, 1).getEntry();
+  
+// Initialize Shuffleboard widgets for encoder positions
+FLPositionEntry = driveTab.add("FL Encoder Position", 0).getEntry();
+RLPositionEntry = driveTab.add("RL Encoder Position", 0).getEntry();
+FRPositionEntry = driveTab.add("FR Encoder Position", 0).getEntry();
+RRPositionEntry = driveTab.add("RR Encoder Position", 0).getEntry();
+
+// Initialize Shuffleboard widgets for encoder distances
+FLDistanceEntry = driveTab.add("FL Encoder Distance", 0.0).getEntry();
+RLDistanceEntry = driveTab.add("RL Encoder Distance", 0.0).getEntry();
+FRDistanceEntry = driveTab.add("FR Encoder Distance", 0.0).getEntry();
+RRDistanceEntry = driveTab.add("RR Encoder Distance", 0.0).getEntry();
+
+// Initialize Shuffleboard widgets for voltages
+FLVoltageEntry = driveTab.add("FL Voltage", 0.0).getEntry();
+RLVoltageEntry = driveTab.add("RL Voltage", 0.0).getEntry();
+FRVoltageEntry = driveTab.add("FR Voltage", 0.0).getEntry();
+RRVoltageEntry = driveTab.add("RR Voltage", 0.0).getEntry();
+
+// Initialize Shuffleboard widgets for encoder rates
+FLRateEntry = driveTab.add("FL Encoder Rate", 0.0).getEntry();
+RLRateEntry = driveTab.add("RL Encoder Rate", 0.0).getEntry();
+FRRateEntry = driveTab.add("FR Encoder Rate", 0.0).getEntry();
+RRRateEntry = driveTab.add("RR Encoder Rate", 0.0).getEntry();
 
 
     //Testbed Factory reset motor controllers
@@ -271,9 +334,14 @@ public class Drivetrain extends SubsystemBase {
       mecanumDriveWheelSpeeds.desaturate(PhysicalConstants.kMaxVelocity);
       setSpeeds(mecanumDriveWheelSpeeds);
 
+      log("Driving with speeds X: " + xSpeed + " Y: " + ySpeed + " Rot: " + rot);
       SmartDashboard.putNumber("Joy1 X", xSpeed);
       SmartDashboard.putNumber("Joy1 Y", ySpeed);
       SmartDashboard.putNumber("Joy2 X", rot);
+
+      //driveTab.add("Joy1 X", xSpeed);
+      //driveTab.add("Joy1 Y", ySpeed);
+      //driveTab.add("Joy2 X", rot);
 
   }
 
@@ -389,6 +457,7 @@ public class Drivetrain extends SubsystemBase {
     m_frontRight.setVoltage(frontRightOutput + frontRightFeedforward);
     m_rearLeft.setVoltage(backLeftOutput + backLeftFeedforward);
     m_rearRight.setVoltage(backRightOutput + backRightFeedforward);
+    log("Setting speeds FL: " + speeds.frontLeftMetersPerSecond + " FR: " + speeds.frontRightMetersPerSecond + " ...");
   }
 
 
@@ -446,10 +515,10 @@ public class Drivetrain extends SubsystemBase {
 
   public void showTelemetry(){
 
-    driveTab.add("Heading", getHeading());
+    //driveTab.add("Direction", getHeading());
     
-    driveTab.add("Turn Rate", getTurnRate());
-    driveTab.add("Field Relative", getFieldRelative());
+    //driveTab.add("Turn Rate", getTurnRate());
+    //driveTab.add("Field Relative", getFieldRelative());
 
     driveTab.add("FL Encoder Position", m_frontLeftEncoder.getRaw());
     driveTab.add("RL Encoder Position", m_rearLeftEncoder.getRaw());
