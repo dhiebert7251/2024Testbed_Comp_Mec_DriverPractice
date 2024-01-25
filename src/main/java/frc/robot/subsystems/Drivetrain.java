@@ -4,8 +4,7 @@
 
 package frc.robot.subsystems;
 
-//import com.revrobotics.CANSparkMax;
-//import com.revrobotics.CANSparkLowLevel.MotorType;
+
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -28,20 +27,11 @@ import frc.robot.Constants.AutoConstants;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
-//import com.revrobotics.RelativeEncoder;
 import com.pathplanner.lib.auto.AutoBuilder;
 
 
 
 public class Drivetrain extends SubsystemBase {
-  //Compbot motor controllers
-  //private final CANSparkMax m_frontLeft = new CANSparkMax(DriveConstants.kFrontLeftMotorPort, MotorType.kBrushless);
-  //private final CANSparkMax m_rearLeft = new CANSparkMax(DriveConstants.kRearLeftMotorPort, MotorType.kBrushless);
-  //private final CANSparkMax m_frontRight = new CANSparkMax(DriveConstants.kFrontRightMotorPort, MotorType.kBrushless);
-  //private final CANSparkMax m_rearRight = new CANSparkMax(DriveConstants.kRearRightMotorPort, MotorType.kBrushless);
-
-  //private MecanumDrive m_drive = new MecanumDrive(m_frontLeft, m_rearLeft, m_frontRight, m_rearRight);
-
 
   //Testbed motor controllers
   private final WPI_TalonSRX m_frontLeft = new WPI_TalonSRX(DriveConstants.kFrontLeftMotorPort);
@@ -56,12 +46,7 @@ public class Drivetrain extends SubsystemBase {
 
 
   //Encoders
-  
-    // Compbot encoders
-    //private final RelativeEncoder m_frontLeftEncoder; 
-    //private final RelativeEncoder m_rearLeftEncoder; 
-    //private final RelativeEncoder m_frontRightEncoder; 
-    //private final RelativeEncoder m_rearRightEncoder;  
+   
 
   // The front-left-side drive encoder
   private final Encoder m_frontLeftEncoder =
@@ -146,17 +131,6 @@ public class Drivetrain extends SubsystemBase {
     SendableRegistry.addChild(m_drive, m_rearRight);
     //TODO: add other sensors? (encoders, gyro, etc.)
 
-    //Compbot encoders
-    //m_frontLeftEncoder = m_frontLeft.getEncoder();
-    //m_rearLeftEncoder = m_rearLeft.getEncoder();
-    //m_frontRightEncoder = m_frontRight.getEncoder();
-    //m_rearRightEncoder = m_rearRight.getEncoder();
-
-    //Compbot Factory reset motor controllers 
-    //m_frontLeft.restoreFactoryDefaults();
-    //m_rearLeft.restoreFactoryDefaults();
-    //m_frontRight.restoreFactoryDefaults();
-    //m_rearRight.restoreFactoryDefaults();
 
     //Testbed Factory reset motor controllers
     m_frontLeft.configFactoryDefault();
@@ -164,24 +138,11 @@ public class Drivetrain extends SubsystemBase {
     m_frontRight.configFactoryDefault();
     m_rearRight.configFactoryDefault();
 
-    //Compbot break/coast mode
-    //m_frontLeft.setIdleMode(IdleMode.kCoast);
-    //m_rearLeft.setIdleMode(IdleMode.kCoast);
-    //m_frontRight.setIdleMode(IdleMode.kCoast);
-    //m_rearRight.setIdleMode(IdleMode.kCoast);
-
     //Testbed break/coast mode
     m_frontLeft.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Coast);
     m_rearLeft.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Coast);
     m_frontRight.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Coast);
     m_rearRight.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Coast);
-
-    // Sets the distance per pulse for the encoders
-    //Compbot
-    //m_frontLeftEncoder.setPositionConversionFactor(PhysicalConstants.kEncoderDistancePerPulse);
-    //m_rearLeftEncoder.setPositionConversionFactor(PhysicalConstants.kEncoderDistancePerPulse);
-    //m_frontRightEncoder.setPositionConversionFactor(PhysicalConstants.kEncoderDistancePerPulse);
-    //m_rearRightEncoder.setPositionConversionFactor(PhysicalConstants.kEncoderDistancePerPulse);
 
     //Testbed
     m_frontLeftEncoder.setDistancePerPulse(PhysicalConstants.kEncoderDistancePerPulse);
@@ -223,6 +184,13 @@ public class Drivetrain extends SubsystemBase {
     
   }
 
+/* Periodic
+ * 
+ * 
+ * 
+ * 
+ */
+
   @Override
   public void periodic() {
 
@@ -235,7 +203,11 @@ public class Drivetrain extends SubsystemBase {
     showTelemetry();
   }
 
-
+/*
+ * 
+ * 
+ * 
+ */
 
   /**
    * Returns the currently-estimated pose of the robot.
@@ -252,7 +224,12 @@ public class Drivetrain extends SubsystemBase {
     m_odometry.resetPosition(m_gyro.getRotation2d(), getCurrentWheelDistances(), pose);
   }
 
- 
+ /*  Drive methods
+  * 
+  *
+  *
+  *
+  */
 
   public void driveFieldRelative(ChassisSpeeds fieldRelativeSpeeds) {
     driveRobotRelative(ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, getPose().getRotation()));
@@ -267,16 +244,6 @@ public class Drivetrain extends SubsystemBase {
 
   }
 
-
-
-  /**
-   * Resets the odometry to the specified pose.
-   *
-   * @param pose The pose to which to set the odometry.
-   */
-  public void resetOdometry(Pose2d pose) {
-    m_odometry.resetPosition(m_gyro.getRotation2d(), getCurrentWheelDistances(), pose);
-  }
 
 /**
    * Method to drive the robot using joystick info.
@@ -307,24 +274,22 @@ public class Drivetrain extends SubsystemBase {
 
 
 
-  /* Sets the front left drive MotorController to a voltage. */
-  /*
-  public void setDriveMotorControllersVolts(MecanumDriveMotorVoltages volts) {
-    m_frontLeft.setVoltage(volts.frontLeftVoltage);
-    m_rearLeft.setVoltage(volts.rearLeftVoltage);
-    m_frontRight.setVoltage(volts.frontRightVoltage);
-    m_rearRight.setVoltage(volts.rearRightVoltage);
+
+
+  /**
+   * Resets the odometry to the specified pose.
+   *
+   * @param pose The pose to which to set the odometry.
+   */
+  public void resetOdometry(Pose2d pose) {
+    m_odometry.resetPosition(m_gyro.getRotation2d(), getCurrentWheelDistances(), pose);
   }
-*/
-  
+
+
+
 
   /** Resets the drive encoders to currently read a position of 0. */
   public void resetEncoders() {
-    //Compbot
-    //m_frontLeftEncoder.setPosition(0);
-    //m_rearLeftEncoder.setPosition(0);
-    //m_frontRightEncoder.setPosition(0);
-    //m_rearRightEncoder.setPosition(0);
 
     //Testbed
     m_frontLeftEncoder.reset();
@@ -333,53 +298,24 @@ public class Drivetrain extends SubsystemBase {
     m_rearRightEncoder.reset();
   }
 
-  /**
-   * Gets the front left drive encoder.
-   *
-   * @return the front left drive encoder
-   */
-  public Encoder getFrontLeftEncoder() {
-    //Compbot
-    //return m_frontLeftEncoder.getEncoder();
 
+  public Encoder getFrontLeftEncoder() {
     //Testbed
     return m_frontLeftEncoder;
   }
 
-  /**
-   * Gets the rear left drive encoder.
-   *
-   * @return the rear left drive encoder
-   */
   public Encoder getRearLeftEncoder() {
-    //Compbot
-    //return m_rearLeftEncoder.getEncoder();
-
     //Testbed
     return m_rearLeftEncoder;
   }
 
-  /**
-   * Gets the front right drive encoder.
-   *
-   * @return the front right drive encoder
-   */
   public Encoder getFrontRightEncoder() {
-    //Compbot
-    //return m_frontRightEncoder.getEncoder();
-
     //Testbed
     return m_frontRightEncoder;
   }
 
-  /**
-   * Gets the rear right drive encoder.
-   *
-   * @return the rear right encoder
-   */
+
   public Encoder getRearRightEncoder() {
-    //Compbot
-    //return m_rearRightEncoder.getEncoder();
 
     //Testbed
     return m_rearRightEncoder;
@@ -397,12 +333,6 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("RR Encoder Rate", m_rearRightEncoder.getRate());
 
     return new MecanumDriveWheelSpeeds(
-
-        //Compbot
-        //m_frontLeftEncoder.getVelocity(),
-        //m_rearLeftEncoder.getVelocity(),
-        //m_frontRightEncoder.getVelocity(),
-        //m_rearRightEncoder.getVelocity());
 
         //Testbed
         m_frontLeftEncoder.getRate(),
@@ -423,13 +353,6 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("RL Encoder Distance", m_rearLeftEncoder.getDistance());
     SmartDashboard.putNumber("FR Encoder Distance", m_frontRightEncoder.getDistance());
     SmartDashboard.putNumber("RR Encoder Distance", m_rearRightEncoder.getDistance());
-    //Compbot
-    //return new MecanumDriveWheelPositions(
-    //    m_frontLeftEncoder.getPosition(),
-    //    m_rearLeftEncoder.getPosition(),
-    //    m_frontRightEncoder.getPosition(),
-    //    m_rearRightEncoder.getPosition());  
-
 
     //Testbed
     return new MecanumDriveWheelPositions(
