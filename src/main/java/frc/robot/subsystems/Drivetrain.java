@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.PhysicalConstants;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.AutoConstants;
 
 import java.time.Instant;
@@ -65,6 +66,10 @@ public class Drivetrain extends SubsystemBase {
     private GenericEntry RLVoltageEntry;
     private GenericEntry FRVoltageEntry;
     private GenericEntry RRVoltageEntry;
+
+    private GenericEntry Joy1XEntry;
+    private GenericEntry Joy1YEntry;
+    private GenericEntry Joy2XEntry;
 
 
   
@@ -175,29 +180,35 @@ public class Drivetrain extends SubsystemBase {
     turnRateEntry = driveTab.add("Turn Rate", 0).withWidget("Dial").withPosition(2, 0).withSize(2, 2).getEntry();
     fieldRelativeEntry = driveTab.add("Field Relative", false).withWidget("Boolean Box").withPosition(4, 0).withSize(1, 1).getEntry();
   
-// Initialize Shuffleboard widgets for encoder positions
-FLPositionEntry = driveTab.add("FL Encoder Position", 0).getEntry();
-RLPositionEntry = driveTab.add("RL Encoder Position", 0).getEntry();
-FRPositionEntry = driveTab.add("FR Encoder Position", 0).getEntry();
-RRPositionEntry = driveTab.add("RR Encoder Position", 0).getEntry();
+    // Initialize Shuffleboard widgets for encoder positions
+    FLPositionEntry = driveTab.add("FL Encoder Position", 0).getEntry();
+    RLPositionEntry = driveTab.add("RL Encoder Position", 0).getEntry();
+    FRPositionEntry = driveTab.add("FR Encoder Position", 0).getEntry();
+    RRPositionEntry = driveTab.add("RR Encoder Position", 0).getEntry();
 
-// Initialize Shuffleboard widgets for encoder distances
-FLDistanceEntry = driveTab.add("FL Encoder Distance", 0.0).getEntry();
-RLDistanceEntry = driveTab.add("RL Encoder Distance", 0.0).getEntry();
-FRDistanceEntry = driveTab.add("FR Encoder Distance", 0.0).getEntry();
-RRDistanceEntry = driveTab.add("RR Encoder Distance", 0.0).getEntry();
+    // Initialize Shuffleboard widgets for encoder distances
+    FLDistanceEntry = driveTab.add("FL Encoder Distance", 0.0).getEntry();
+    RLDistanceEntry = driveTab.add("RL Encoder Distance", 0.0).getEntry();
+    FRDistanceEntry = driveTab.add("FR Encoder Distance", 0.0).getEntry();
+    RRDistanceEntry = driveTab.add("RR Encoder Distance", 0.0).getEntry();
 
-// Initialize Shuffleboard widgets for voltages
-FLVoltageEntry = driveTab.add("FL Voltage", 0.0).getEntry();
-RLVoltageEntry = driveTab.add("RL Voltage", 0.0).getEntry();
-FRVoltageEntry = driveTab.add("FR Voltage", 0.0).getEntry();
-RRVoltageEntry = driveTab.add("RR Voltage", 0.0).getEntry();
+    // Initialize Shuffleboard widgets for voltages
+    FLVoltageEntry = driveTab.add("FL Voltage", 0.0).getEntry();
+    RLVoltageEntry = driveTab.add("RL Voltage", 0.0).getEntry();
+    FRVoltageEntry = driveTab.add("FR Voltage", 0.0).getEntry();
+    RRVoltageEntry = driveTab.add("RR Voltage", 0.0).getEntry();
 
-// Initialize Shuffleboard widgets for encoder rates
-FLRateEntry = driveTab.add("FL Encoder Rate", 0.0).getEntry();
-RLRateEntry = driveTab.add("RL Encoder Rate", 0.0).getEntry();
-FRRateEntry = driveTab.add("FR Encoder Rate", 0.0).getEntry();
-RRRateEntry = driveTab.add("RR Encoder Rate", 0.0).getEntry();
+    // Initialize Shuffleboard widgets for encoder rates
+    FLRateEntry = driveTab.add("FL Encoder Rate", 0.0).getEntry();
+    RLRateEntry = driveTab.add("RL Encoder Rate", 0.0).getEntry();
+    FRRateEntry = driveTab.add("FR Encoder Rate", 0.0).getEntry();
+    RRRateEntry = driveTab.add("RR Encoder Rate", 0.0).getEntry();
+
+    // Initialize Shuffleboard widgets for joystick values
+    Joy1XEntry = driveTab.add("Joy1 X", 0.0).getEntry();
+    Joy1YEntry = driveTab.add("Joy1 Y", 0.0).getEntry();
+    Joy2XEntry = driveTab.add("Joy2 X", 0.0).getEntry();
+
 
 
     //Testbed Factory reset motor controllers
@@ -334,14 +345,15 @@ RRRateEntry = driveTab.add("RR Encoder Rate", 0.0).getEntry();
       mecanumDriveWheelSpeeds.desaturate(PhysicalConstants.kMaxVelocity);
       setSpeeds(mecanumDriveWheelSpeeds);
 
-      log("Driving with speeds X: " + xSpeed + " Y: " + ySpeed + " Rot: " + rot);
-      SmartDashboard.putNumber("Joy1 X", xSpeed);
-      SmartDashboard.putNumber("Joy1 Y", ySpeed);
-      SmartDashboard.putNumber("Joy2 X", rot);
+      //log("Driving with speeds X: " + xSpeed + " Y: " + ySpeed + " Rot: " + rot);
+      //SmartDashboard.putNumber("Joy1 X", xSpeed);
+      //SmartDashboard.putNumber("Joy1 Y", ySpeed);
+      //SmartDashboard.putNumber("Joy2 X", rot);
 
-      //driveTab.add("Joy1 X", xSpeed);
-      //driveTab.add("Joy1 Y", ySpeed);
-      //driveTab.add("Joy2 X", rot);
+      Joy1XEntry.setDouble(xSpeed);
+      Joy1YEntry.setDouble(ySpeed);
+      Joy2XEntry.setDouble(rot);
+
 
   }
 
@@ -514,31 +526,35 @@ RRRateEntry = driveTab.add("RR Encoder Rate", 0.0).getEntry();
     */
 
   public void showTelemetry(){
+    // Update the Shuffleboard entries with current values
+    FLPositionEntry.setDouble(m_frontLeftEncoder.getRaw());
+    RLPositionEntry.setDouble(m_rearLeftEncoder.getRaw());
+    FRPositionEntry.setDouble(m_frontRightEncoder.getRaw());
+    RRPositionEntry.setDouble(m_rearRightEncoder.getRaw());
 
-    //driveTab.add("Direction", getHeading());
+    FLDistanceEntry.setDouble(m_frontLeftEncoder.getDistance());
+    RLDistanceEntry.setDouble(m_rearLeftEncoder.getDistance());
+    FRDistanceEntry.setDouble(m_frontRightEncoder.getDistance());
+    RRDistanceEntry.setDouble(m_rearRightEncoder.getDistance());
+
+    FLVoltageEntry.setDouble(m_frontLeft.getMotorOutputVoltage());
+    RLVoltageEntry.setDouble(m_rearLeft.getMotorOutputVoltage());
+    FRVoltageEntry.setDouble(m_frontRight.getMotorOutputVoltage());
+    RRVoltageEntry.setDouble(m_rearRight.getMotorOutputVoltage());
+
+    FLRateEntry.setDouble(m_frontLeftEncoder.getRate());
+    RLRateEntry.setDouble(m_rearLeftEncoder.getRate());
+    FRRateEntry.setDouble(m_frontRightEncoder.getRate());
+    RRRateEntry.setDouble(m_rearRightEncoder.getRate());
+
+    headingEntry.setDouble(getHeading());
+    turnRateEntry.setDouble(getTurnRate());
+    fieldRelativeEntry.setBoolean(getFieldRelative());
+
+
+
+
     
-    //driveTab.add("Turn Rate", getTurnRate());
-    //driveTab.add("Field Relative", getFieldRelative());
-
-    driveTab.add("FL Encoder Position", m_frontLeftEncoder.getRaw());
-    driveTab.add("RL Encoder Position", m_rearLeftEncoder.getRaw());
-    driveTab.add("FR Encoder Position", m_frontRightEncoder.getRaw());
-    driveTab.add("RR Encoder Position", m_rearRightEncoder.getRaw());
-
-    driveTab.add("FL Encoder Distance", m_frontLeftEncoder.getDistance());
-    driveTab.add("RL Encoder Distance", m_rearLeftEncoder.getDistance());
-    driveTab.add("FR Encoder Distance", m_frontRightEncoder.getDistance());
-    driveTab.add("RR Encoder Distance", m_rearRightEncoder.getDistance());
-    
-    driveTab.add("FL Voltage", m_frontLeft.getMotorOutputVoltage());
-    driveTab.add("RL Voltage", m_rearLeft.getMotorOutputVoltage());    
-    driveTab.add("FR Voltage", m_frontRight.getMotorOutputVoltage());    
-    driveTab.add("RR Voltage", m_rearRight.getMotorOutputVoltage());
-
-    driveTab.add("FL Encoder Rate", m_frontLeftEncoder.getRate());
-    driveTab.add("RL Encoder Rate", m_rearLeftEncoder.getRate());
-    driveTab.add("FR Encoder Rate", m_frontRightEncoder.getRate());
-    driveTab.add("RR Encoder Rate", m_rearRightEncoder.getRate());
   
   }
 }
