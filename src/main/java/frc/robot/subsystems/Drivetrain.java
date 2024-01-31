@@ -14,22 +14,30 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.MecanumDriveOdometry;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Voltage;
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.PhysicalConstants;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.AutoConstants;
+//SysID
+
 
 import java.time.Instant;
 
@@ -120,6 +128,7 @@ public class Drivetrain extends SubsystemBase {
           DriveConstants.kRearRightEncoderPorts[1],
           DriveConstants.kRearRightEncoderReversed);
 
+          
   // Wheel PID controllers
   private final PIDController m_frontLeftPIDController =
       new PIDController(PhysicalConstants.kPFrontLeft, 
@@ -156,14 +165,19 @@ public class Drivetrain extends SubsystemBase {
   // The feedforward for the drive TODO: how do you tune this?
   private final SimpleMotorFeedforward m_feedforward = new SimpleMotorFeedforward(1, 3);
 
-  /** Creates a new DriveSubsystem. */
+
+
+
+  /** Constructor -- initialize values here */
+
+
   public Drivetrain() {
     // Calibrate gyro
       new Thread(() -> {
         try {
           Thread.sleep(1000);
           zeroHeading();
-        } catch (Exception e){
+          } catch (Exception e){
         }
       }).start();
 
@@ -218,10 +232,10 @@ public class Drivetrain extends SubsystemBase {
     m_rearRight.configFactoryDefault();
 
     //Testbed break/coast mode
-    m_frontLeft.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Coast);
-    m_rearLeft.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Coast);
-    m_frontRight.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Coast);
-    m_rearRight.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Coast);
+    m_frontLeft.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
+    m_rearLeft.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
+    m_frontRight.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
+    m_rearRight.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
 
     //Testbed
     m_frontLeftEncoder.setDistancePerPulse(PhysicalConstants.kEncoderDistancePerPulse);
@@ -234,9 +248,7 @@ public class Drivetrain extends SubsystemBase {
     m_rearLeft.setInverted(DriveConstants.kRearLeftMotorReversed);
     m_frontRight.setInverted(DriveConstants.kFrontRightMotorReversed);
     m_rearRight.setInverted(DriveConstants.kRearRightMotorReversed);
-
-
-    
+ 
     // Configure AutoBuilder
     AutoBuilder.configureHolonomic(
       this::getPose, 
@@ -259,7 +271,7 @@ public class Drivetrain extends SubsystemBase {
       this
     );
     
-
+      
     
   }
 
@@ -334,7 +346,7 @@ public class Drivetrain extends SubsystemBase {
    */
   public void drive(
     double xSpeed, double ySpeed, double rot, boolean fieldRelative, double periodSeconds) {
-      var mecanumDriveWheelSpeeds =
+      /*var mecanumDriveWheelSpeeds =
           PhysicalConstants.kDriveKinematics.toWheelSpeeds(
              ChassisSpeeds.discretize(
                   fieldRelative
@@ -344,11 +356,13 @@ public class Drivetrain extends SubsystemBase {
                   periodSeconds));
       mecanumDriveWheelSpeeds.desaturate(PhysicalConstants.kMaxVelocity);
       setSpeeds(mecanumDriveWheelSpeeds);
-
-      //log("Driving with speeds X: " + xSpeed + " Y: " + ySpeed + " Rot: " + rot);
-      //SmartDashboard.putNumber("Joy1 X", xSpeed);
-      //SmartDashboard.putNumber("Joy1 Y", ySpeed);
-      //SmartDashboard.putNumber("Joy2 X", rot);
+      */
+      if(fieldRelative){
+        m_drive.driveCartesian(xSpeed, ySpeed, rot, -m_gyro.getRotation2d());
+      }
+      else{
+        m_drive.driveCartesian(xSpeed, ySpeed, rot);
+      }
 
       Joy1XEntry.setDouble(xSpeed);
       Joy1YEntry.setDouble(ySpeed);
@@ -493,6 +507,7 @@ public class Drivetrain extends SubsystemBase {
   /** Zeroes the heading of the robot. */
   public void zeroHeading() {
     m_gyro.reset();
+    m_gyro.setAngleAdjustment(90);
   }
 
   /**
@@ -501,7 +516,7 @@ public class Drivetrain extends SubsystemBase {
    * @return the robot's heading in degrees, from -180 to 180
    */
   public double getHeading() {
-    return m_gyro.getRotation2d().getDegrees();
+    return -m_gyro.getRotation2d().getDegrees();
   }
 
   /**
@@ -516,6 +531,8 @@ public class Drivetrain extends SubsystemBase {
   public boolean getFieldRelative() {
     return m_gyro.isConnected();
   }
+
+
 
 
 /*
@@ -557,4 +574,53 @@ public class Drivetrain extends SubsystemBase {
     
   
   }
+/*
+  //SysID
+
+  
+  // Create a new SysId routine for characterizing the drive.
+  private final SysIdRoutine m_sysIdRoutine =
+      new SysIdRoutine(
+          // Empty config defaults to 1 volt/second ramp rate and 7 volt step voltage.
+          new SysIdRoutine.Config(),
+          new SysIdRoutine.Mechanism(
+              // Tell SysId how to plumb the driving voltage to the motors.
+              (Measure<Voltage> volts) -> {
+                m_frontLeft.setVoltage(volts.in(Volts));
+                m_rearLeft.setVoltage(volts.in(Volts));
+                m_frontRight.setVoltage(volts.in(Volts));
+                m_rearRight.setVoltage(volts.in(Volts));
+              },
+              // Tell SysId how to record a frame of data for each motor on the mechanism being
+              // characterized.
+              log -> {
+                // Record a frame for the left motors.  Since these share an encoder, we consider
+                // the entire group to be one motor.
+                log.motor("drive-left")
+                    .voltage(
+                        m_appliedVoltage.mut_replace(
+                            m_leftMotor.get() * RobotController.getBatteryVoltage(), Volts))
+                    .linearPosition(m_distance.mut_replace(m_frontLeftEncoder.getDistance(), Meters))
+                    .linearVelocity(
+                        m_velocity.mut_replace(m_frontLeftEncoder.getRate(), MetersPerSecond));
+                // Record a frame for the right motors.  Since these share an encoder, we consider
+                // the entire group to be one motor.
+                log.motor("drive-right")
+                    .voltage(
+                        m_appliedVoltage.mut_replace(
+                            m_rightMotor.get() * RobotController.getBatteryVoltage(), Volts))
+                    .linearPosition(m_distance.mut_replace(m_frontRightEncoder.getDistance(), Meters))
+                    .linearVelocity(
+                        m_velocity.mut_replace(m_rearRightEncoder.getRate(), MetersPerSecond));
+              },
+              // Tell SysId to make generated commands require this subsystem, suffix test state in
+              // WPILog with this subsystem's name ("drive")
+              this));
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return m_sysIdRoutine.quasistatic(direction);
+  }
+
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return m_sysIdRoutine.dynamic(direction);
+  }*/
 }

@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 //import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 //import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 
 
@@ -74,12 +75,14 @@ public class RobotContainer {
           
             () ->
                 m_robotDrive.drive(
-                    -m_driverController.getLeftY(),
-                    -m_driverController.getLeftX(),
-              m_driverController.getRightX(),
+                    m_driverController.getLeftX(),
+                    m_driverController.getLeftY(),
+                    -m_driverController.getRightX(),
                     m_robotDrive.getFieldRelative(),
                     0.02), //should this be 0.02?
             m_robotDrive)
+            
+
             );
 
 
@@ -99,6 +102,18 @@ public class RobotContainer {
     new JoystickButton(m_driverController, Button.kRightBumper.value)
         .onTrue(new InstantCommand(() -> m_robotDrive.setMaxOutput(0.5)))
         .onFalse(new InstantCommand(() -> m_robotDrive.setMaxOutput(1)));
+
+/*
+    //SYS ID
+    // Bind full set of SysId routine tests to buttons; a complete routine should run each of these
+    // once.
+    new JoystickButton(m_driverController, Button.kA)
+      .onTrue(m_robotDrive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    //m_driverController.a().whileTrue(m_robotDrive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    m_driverController.b().whileTrue(m_robotDrive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    m_driverController.x().whileTrue(m_robotDrive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    m_driverController.y().whileTrue(m_robotDrive.sysIdDynamic(SysIdRoutine.Direction.kReverse));   
+    */   
   }
 
   /**

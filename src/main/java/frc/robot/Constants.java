@@ -38,7 +38,7 @@ public final class Constants {
     public static final int kRearRightMotorPort = 23;
 
     //Drive motor inverse
-    public static final boolean kFrontLeftMotorReversed = true;
+    public static final boolean kFrontLeftMotorReversed = true; //TODO:  does reversing these help?
     public static final boolean kRearLeftMotorReversed = true;
     public static final boolean kFrontRightMotorReversed = false;
     public static final boolean kRearRightMotorReversed = false;
@@ -104,7 +104,8 @@ public final class Constants {
     //public static final double kMaxRPM = 5676 / kGearRatio; //Neo 550
 
     // Max velocity
-    public static final double kMaxVelocity = kMaxRPM * (kWheelDiameterMeters * Math.PI) / 60; //meters per second
+    //public static final double kMaxVelocity = kMaxRPM * (kWheelDiameterMeters * Math.PI) / 60; //meters per second
+    public static final double kMaxVelocity = 2*kMaxRPM * (kWheelDiameterMeters * Math.PI) / 60; //TODO: test value - adjust
 
     // Max acceleration
     public static final double kMaxAcceleration = 1.5; //meters per second squared TODO: tune this
@@ -140,8 +141,8 @@ public final class Constants {
 
 
   public static final class AutoConstants {
-    public static final double kMaxSpeedMetersPerSecond = 3;
-    public static final double kMaxAccelerationMetersPerSecondSquared = 3;
+    public static final double kMaxSpeedMetersPerSecond = 3; //TODO: adjust
+    public static final double kMaxAccelerationMetersPerSecondSquared = 1.5; //TODO: adjust
     public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI;
     public static final double kMaxAngularSpeedRadiansPerSecondSquared = Math.PI;
 
