@@ -358,7 +358,7 @@ public class Drivetrain extends SubsystemBase {
       setSpeeds(mecanumDriveWheelSpeeds);
       */
       if(fieldRelative){
-        m_drive.driveCartesian(xSpeed, ySpeed, rot, -m_gyro.getRotation2d());
+        m_drive.driveCartesian(xSpeed, ySpeed, rot, m_gyro.getRotation2d().times(-1));
       }
       else{
         m_drive.driveCartesian(xSpeed, ySpeed, rot);
@@ -381,7 +381,7 @@ public class Drivetrain extends SubsystemBase {
    * @param pose The pose to which to set the odometry.
    */
   public void resetOdometry(Pose2d pose) {
-    m_odometry.resetPosition(m_gyro.getRotation2d(), getCurrentWheelDistances(), pose);
+    m_odometry.resetPosition(m_gyro.getRotation2d().times(-1), getCurrentWheelDistances(), pose);
   }
 
 
