@@ -4,6 +4,10 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
+
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
@@ -18,10 +22,14 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+
+
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
   
+
+
   public static final class DriveConstants {
     //Drive motor CAN IDs
     public static final int kFrontLeftMotorPort = 20;
@@ -30,7 +38,7 @@ public final class Constants {
     public static final int kRearRightMotorPort = 23;
 
     //Drive motor inverse
-    public static final boolean kFrontLeftMotorReversed = true;
+    public static final boolean kFrontLeftMotorReversed = true; //TODO:  does reversing these help?
     public static final boolean kRearLeftMotorReversed = true;
     public static final boolean kFrontRightMotorReversed = false;
     public static final boolean kRearRightMotorReversed = false;
@@ -52,6 +60,8 @@ public final class Constants {
 
   }
 
+
+
   public static final class PhysicalConstants {
     // Distance between centers of right and left wheels on robot
     public static final double kTrackWidthIn = 20; //inches
@@ -60,6 +70,9 @@ public final class Constants {
   // Distance between centers of front and back wheels on robot
     public static final double kWheelBaseIn = 24; //inches
     public static final double kWheelBase = kWheelBaseIn * 0.0254; //meters
+
+  // Drive base radius
+     public static final double kDriveBaseRadius = Math.sqrt(Math.pow(kWheelBase / 2, 2) + Math.pow(kTrackWidth / 2, 2));
   
 
     public static final MecanumDriveKinematics kDriveKinematics =
@@ -91,19 +104,51 @@ public final class Constants {
     //public static final double kMaxRPM = 5676 / kGearRatio; //Neo 550
 
     // Max velocity
-    public static final double kMaxVelocity = kMaxRPM * (kWheelDiameterMeters * Math.PI) / 60; //meters per second
+    //public static final double kMaxVelocity = kMaxRPM * (kWheelDiameterMeters * Math.PI) / 60; //meters per second
+    public static final double kMaxVelocity = 2*kMaxRPM * (kWheelDiameterMeters * Math.PI) / 60; //TODO: test value - adjust
 
     // Max acceleration
     public static final double kMaxAcceleration = 1.5; //meters per second squared TODO: tune this
 
     // Max angular velocity
-    public static final double kMaxAngularVelocity = Math.PI; //radians per second
-
+    public static final double kMaxAngularVelocity = Math.PI; //radians per second --- 1/2 rotation per second TODO: tune this
+    
     // Max angular acceleration
     public static final double kMaxAngularAcceleration = Math.PI; //radians per second squared
 
-    
+    // Wheel PID Constants
+    public static final double kPFrontLeft = 0.5;
+    public static final double kIFrontLeft = 0;
+    public static final double kDFrontLeft = 0;
 
+    public static final double kPRearLeft = 0.5;
+    public static final double kIRearLeft = 0;
+    public static final double kDRearLeft = 0;
+
+    public static final double kPFrontRight = 0.5;
+    public static final double kIFrontRight = 0;
+    public static final double kDFrontRight = 0;
+
+    public static final double kPRearRight = 0.5;
+    public static final double kIRearRight = 0;
+    public static final double kDRearRight = 0;
+
+
+
+  }
+
+
+
+
+  public static final class AutoConstants {
+    public static final double kMaxSpeedMetersPerSecond = 3; //TODO: adjust
+    public static final double kMaxAccelerationMetersPerSecondSquared = 1.5; //TODO: adjust
+    public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI;
+    public static final double kMaxAngularSpeedRadiansPerSecondSquared = Math.PI;
+
+    public static final double kPXController = 0.5;
+    public static final double kPYController = 0.5;
+    public static final double kPThetaController = 0.5;
 
     // TODO: tune these values
     // These are example values only - DO NOT USE THESE FOR YOUR OWN ROBOT!
@@ -114,56 +159,44 @@ public final class Constants {
         new SimpleMotorFeedforward(1, 0.8, 0.15);
 
     // Example value only - as above, this must be tuned for your drive!
-    public static final double kPFrontLeftVel = 0.5;
-    public static final double kPRearLeftVel = 0.5;
-    public static final double kPFrontRightVel = 0.5;
-    public static final double kPRearRightVel = 0.5;
+    public static final double kPTranslation = 0.5;
+    public static final double kITranslation = 0;
+    public static final double kDTranslation = 0;
 
-    public static final double kPFrontLeftPos = 0.5;
-    public static final double kPRearLeftPos = 0.5;
-    public static final double kPFrontRightPos = 0.5;
-    public static final double kPRearRightPos = 0.5;
+    public static final double kPRotation = 0.5;
+    public static final double kIRotation = 0;
+    public static final double kDRotation = 0;
 
-    public static final double kIFrontLeftVel = 0;
-    public static final double kIRearLeftVel = 0;
-    public static final double kIFrontRightVel = 0;
-    public static final double kIRearRightVel = 0;
-
-    public static final double kIFrontLeftPos = 0;
-    public static final double kIRearLeftPos = 0;
-    public static final double kIFrontRightPos = 0;
-    public static final double kIRearRightPos = 0;
-
-    public static final double kDFrontLeftVel = 0;
-    public static final double kDRearLeftVel = 0;
-    public static final double kDFrontRightVel = 0;
-    public static final double kDRearRightVel = 0;
-
-    public static final double kDFrontLeftPos = 0;
-    public static final double kDRearLeftPos = 0;
-    public static final double kDFrontRightPos = 0;
-    public static final double kDRearRightPos = 0;
-
-
-  }
-
-  public static final class OIConstants {
-    public static final int kDriverControllerPort = 0;
-  }
-
-  public static final class AutoConstants {
-    public static final double kMaxSpeedMetersPerSecond = 3;
-    public static final double kMaxAccelerationMetersPerSecondSquared = 3;
-    public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI;
-    public static final double kMaxAngularSpeedRadiansPerSecondSquared = Math.PI;
-
-    public static final double kPXController = 0.5;
-    public static final double kPYController = 0.5;
-    public static final double kPThetaController = 0.5;
 
     // Constraint for the motion profilied robot angle controller
     public static final TrapezoidProfile.Constraints kThetaControllerConstraints =
         new TrapezoidProfile.Constraints(
             kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
+
+
+    // Path follower config        
+    public static final HolonomicPathFollowerConfig kPathFollowerConfig = new HolonomicPathFollowerConfig( 
+      new PIDConstants(AutoConstants.kPTranslation, AutoConstants.kITranslation, AutoConstants.kDTranslation), // Translation PID constants
+      new PIDConstants(AutoConstants.kPRotation, AutoConstants.kIRotation, AutoConstants.kDRotation), // Rotation PID constants
+      PhysicalConstants.kMaxVelocity, // Max module speed, in m/s
+      PhysicalConstants.kDriveBaseRadius, // Drive base radius in meters. Distance from robot center to furthest module.
+      new ReplanningConfig()
+    );
+
+
+
+
+
   }
+
+  public static final class VisionConstants {
+    public static final String kCameraName = "PhotonVision"; //TODO: update this
+    public static final double kCameraHeight = 0.5; //meters TODO: update this
+
+  }
+
+  public static final class FieldConstants {
+
+  }
+  
 }
