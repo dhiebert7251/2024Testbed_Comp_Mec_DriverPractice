@@ -43,10 +43,6 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
-
-
-import java.time.Instant;
-
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
@@ -54,6 +50,8 @@ import com.pathplanner.lib.auto.AutoBuilder;
 
 
 
+
+/** The drive subsystem for the robot. */
 public class Drivetrain extends SubsystemBase {
 
 
