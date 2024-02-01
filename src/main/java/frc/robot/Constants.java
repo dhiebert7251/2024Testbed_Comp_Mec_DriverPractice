@@ -152,6 +152,14 @@ public final class Constants {
     public static final double kIRearRight = 0;
     public static final double kDRearRight = 0;
 
+    public static double kPTranslation = 0.5;
+    public static double kITranslation = 0.0;
+    public static double kDTranslation = 0.0;
+    
+    public static double kPRotation = 0.5;
+    public static double kIRotation = 0.0;
+    public static double kDRotation = 0.0;
+
 
 
   }

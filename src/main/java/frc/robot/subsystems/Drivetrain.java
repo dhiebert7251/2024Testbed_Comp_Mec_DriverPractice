@@ -159,6 +159,18 @@ public class Drivetrain extends SubsystemBase {
                         PhysicalConstants.kIRearRight,
                         PhysicalConstants.kDRearRight);
 
+  //Translation PID
+  private final PIDController m_translationPID = 
+      new PIDController(PhysicalConstants.kPTranslation, 
+                        PhysicalConstants.kITranslation,
+                        PhysicalConstants.kDTranslation);
+
+  //Rotation PID
+  private final PIDController m_rotationPID = 
+      new PIDController(PhysicalConstants.kPRotation, 
+                        PhysicalConstants.kIRotation,
+                        PhysicalConstants.kDRotation);
+
   // The gyro sensor
   private final AHRS m_gyro = new AHRS();
 
@@ -343,6 +355,16 @@ public class Drivetrain extends SubsystemBase {
     
   }
 
+  public void setTranslationSetpoint(double translationSpeed) {
+    m_translationPID.setSetpoint(translationSpeed);
+    // Logic to convert translation speed to individual wheel speeds
+  }
+
+public void setRotationSetpoint(double rotationSpeed) {
+    m_rotationPID.setSetpoint(rotationSpeed);
+    // Logic to convert rotation speed to individual wheel speeds
+  }
+
 /* Periodic
  * 
  * 
@@ -392,6 +414,18 @@ public class Drivetrain extends SubsystemBase {
 
   public void driveFieldRelative(ChassisSpeeds fieldRelativeSpeeds) {
     driveRobotRelative(ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, getPose().getRotation()));
+/*
+    // Adjusting the translation speed based on PID output
+    double currentTranslation = // get current forward speed;
+    double pidOutput = m_translationPID.calculate(currentTranslation);
+        
+    // Adjust the fieldRelativeSpeeds with the PID output
+    fieldRelativeSpeeds.vxMetersPerSecond += pidOutput;
+    
+    // Convert to robot relative speeds and drive
+    driveRobotRelative(ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, getPose().getRotation()));
+    */
+
   }
 
   
