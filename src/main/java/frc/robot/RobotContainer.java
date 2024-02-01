@@ -103,17 +103,19 @@ public class RobotContainer {
         .onTrue(new InstantCommand(() -> m_robotDrive.setMaxOutput(0.5)))
         .onFalse(new InstantCommand(() -> m_robotDrive.setMaxOutput(1)));
 
-/*
+
     //SYS ID
     // Bind full set of SysId routine tests to buttons; a complete routine should run each of these
     // once.
-    new JoystickButton(m_driverController, Button.kA)
-      .onTrue(m_robotDrive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    //m_driverController.a().whileTrue(m_robotDrive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    m_driverController.b().whileTrue(m_robotDrive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    m_driverController.x().whileTrue(m_robotDrive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    m_driverController.y().whileTrue(m_robotDrive.sysIdDynamic(SysIdRoutine.Direction.kReverse));   
-    */   
+    new JoystickButton(m_driverController, Button.kA.value)
+      .onTrue(new InstantCommand(() -> m_robotDrive.sysIdQuasistatic(SysIdRoutine.Direction.kForward)));
+    new JoystickButton(m_driverController, Button.kB.value)
+      .onTrue(new InstantCommand(() -> m_robotDrive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)));
+    new JoystickButton(m_driverController, Button.kX.value)
+      .onTrue(new InstantCommand(() -> m_robotDrive.sysIdDynamic(SysIdRoutine.Direction.kForward)));
+    new JoystickButton(m_driverController, Button.kY.value)
+      .onTrue(new InstantCommand(() -> m_robotDrive.sysIdDynamic(SysIdRoutine.Direction.kReverse)));
+
   }
 
   /**
