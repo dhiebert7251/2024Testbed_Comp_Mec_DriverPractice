@@ -159,7 +159,7 @@ public final class Constants {
         new SimpleMotorFeedforward(1, 0.8, 0.15);
 
     // Example value only - as above, this must be tuned for your drive!
-    public static final double kPTranslation = 0.5;
+    public static final double kPTranslation = 0.255;
     public static final double kITranslation = 0;
     public static final double kDTranslation = 0;
 

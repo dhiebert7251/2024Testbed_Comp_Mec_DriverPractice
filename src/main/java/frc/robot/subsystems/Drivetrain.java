@@ -130,6 +130,16 @@ public class Drivetrain extends SubsystemBase {
 
           
   // Wheel PID controllers
+  private final PIDController m_TranslationPID =
+      new PIDController(AutoConstants.kPTranslation,
+      AutoConstants.kITranslation,
+      AutoConstants.kDTranslation);
+  private final PIDController m_RotationPID =
+      new PIDController(AutoConstants.kPRotation,
+      AutoConstants.kIRotation,
+      AutoConstants.kDRotation);
+
+   /* 
   private final PIDController m_frontLeftPIDController =
       new PIDController(PhysicalConstants.kPFrontLeft, 
                         PhysicalConstants.kIFrontLeft,
@@ -149,7 +159,7 @@ public class Drivetrain extends SubsystemBase {
       new PIDController(PhysicalConstants.kPRearRight, 
                         PhysicalConstants.kIRearRight,
                         PhysicalConstants.kDRearRight);
-
+  */
   // The gyro sensor
   private final AHRS m_gyro = new AHRS();
 
@@ -286,7 +296,7 @@ public class Drivetrain extends SubsystemBase {
   public void periodic() {
 
     // Update the odometry in the periodic block
-    m_odometry.update(m_gyro.getRotation2d(), getCurrentWheelDistances());
+    m_odometry.update(m_gyro.getRotation2d().times(-1), getCurrentWheelDistances());
 
     // Update the field
     field.setRobotPose(getPose());
@@ -312,7 +322,7 @@ public class Drivetrain extends SubsystemBase {
   //TODO: update for aprilTag detection of current pose
 
   public void resetPose(Pose2d pose) {
-    m_odometry.resetPosition(m_gyro.getRotation2d(), getCurrentWheelDistances(), pose);
+    m_odometry.resetPosition(m_gyro.getRotation2d().times(-1), getCurrentWheelDistances(), pose);
   }
 
  /*  Drive methods
@@ -461,7 +471,23 @@ public class Drivetrain extends SubsystemBase {
    * @param speeds The desired wheel speeds.
    */
   public void setSpeeds(MecanumDriveWheelSpeeds speeds) {
-    final double frontLeftFeedforward = m_feedforward.calculate(speeds.frontLeftMetersPerSecond);
+    // Calculate average target speed for drivetrain
+    double averageCurrentSpeed = (m_frontLeftEncoder.getRate() + m_rearLeftEncoder.getRate()+ 
+                                m_frontRightEncoder.getRate() + m_rearRightEncoder.getRate() / 4.0);
+    double averageTargetSpeed = (speeds.frontLeftMetersPerSecond + speeds.rearLeftMetersPerSecond + 
+                                speeds.frontRightMetersPerSecond + speeds.rearRightMetersPerSecond) / 4.0;
+    // calculate PID output
+    double translateOutput = m_TranslationPID.calculate(averageCurrentSpeed, averageTargetSpeed);
+
+
+    // Applie PID to all motors
+    m_frontLeft.setVoltage(translateOutput + m_feedforward.calculate(speeds.frontLeftMetersPerSecond));
+    m_frontRight.setVoltage(translateOutput + m_feedforward.calculate(speeds.frontRightMetersPerSecond));
+    m_rearLeft.setVoltage(translateOutput  + m_feedforward.calculate(speeds.rearLeftMetersPerSecond));
+    m_rearRight.setVoltage(translateOutput + m_feedforward.calculate(speeds.rearRightMetersPerSecond));
+
+  }
+    /*final double frontLeftFeedforward = m_feedforward.calculate(speeds.frontLeftMetersPerSecond);
     final double frontRightFeedforward = m_feedforward.calculate(speeds.frontRightMetersPerSecond);
     final double backLeftFeedforward = m_feedforward.calculate(speeds.rearLeftMetersPerSecond);
     final double backRightFeedforward = m_feedforward.calculate(speeds.rearRightMetersPerSecond);
@@ -484,7 +510,7 @@ public class Drivetrain extends SubsystemBase {
     m_rearLeft.setVoltage(backLeftOutput + backLeftFeedforward);
     m_rearRight.setVoltage(backRightOutput + backRightFeedforward);
     log("Setting speeds FL: " + speeds.frontLeftMetersPerSecond + " FR: " + speeds.frontRightMetersPerSecond + " ...");
-  }
+  }*/
 
 
   public ChassisSpeeds getChassisSpeeds(){
