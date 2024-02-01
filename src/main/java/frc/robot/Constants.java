@@ -26,6 +26,25 @@ public final class Constants {
 
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
+
+    public static final int kDriverButtonA = 1;
+    public static final int kDriverButtonB = 2;
+    public static final int kDriverButtonX = 3;
+    public static final int kDriverButtonY = 4;
+    public static final int kDriverButtonLB = 5;
+    public static final int kDriverButtonRB = 6;
+    public static final int kDriverButtonBack = 7;
+    public static final int kDriverButtonStart = 8;
+    public static final int kDriverButtonLStick = 9;
+    public static final int kDriverButtonRStick = 10;
+
+    public static final int kDriverLXAxis = 0;
+    public static final int kDriverLYAxis = 1;
+    public static final int kDriverLTAxis = 2;
+    public static final int kDriverRXAxis = 4;
+    public static final int kDriverRYAxis = 5;
+    public static final int kDriverRTAxis = 3;
+    
   }
   
 
@@ -132,6 +151,14 @@ public final class Constants {
     public static final double kPRearRight = 0.5;
     public static final double kIRearRight = 0;
     public static final double kDRearRight = 0;
+
+    public static double kPTranslation = 0.5;
+    public static double kITranslation = 0.0;
+    public static double kDTranslation = 0.0;
+    
+    public static double kPRotation = 0.5;
+    public static double kIRotation = 0.0;
+    public static double kDRotation = 0.0;
 
 
 
