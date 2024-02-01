@@ -10,15 +10,16 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-//import edu.wpi.first.math.kinematics.MecanumDriveMotorVoltages;
 import edu.wpi.first.math.kinematics.MecanumDriveOdometry;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
+//import edu.wpi.first.networktables.NetworkTable;
+//import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.MutableMeasure;
+import edu.wpi.first.units.Velocity;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -28,15 +29,20 @@ import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.PhysicalConstants;
-import frc.robot.RobotContainer;
 import frc.robot.Constants.AutoConstants;
+
+
 //SysID
+import static edu.wpi.first.units.MutableMeasure.mutable;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+
 
 
 import java.time.Instant;
@@ -49,6 +55,8 @@ import com.pathplanner.lib.auto.AutoBuilder;
 
 
 public class Drivetrain extends SubsystemBase {
+
+
     // Shuffleboard
     private final ShuffleboardTab driveTab = Shuffleboard.getTab("Drivetrain Data");
     private GenericEntry headingEntry;
@@ -80,10 +88,11 @@ public class Drivetrain extends SubsystemBase {
     private GenericEntry Joy2XEntry;
 
 
-  
+  /*
   public void log(String message) {
     System.out.println(Instant.now() + ": " + message);
   }
+  */
 
   //Testbed motor controllers
   private final WPI_TalonSRX m_frontLeft = new WPI_TalonSRX(DriveConstants.kFrontLeftMotorPort);
@@ -165,7 +174,66 @@ public class Drivetrain extends SubsystemBase {
   // The feedforward for the drive TODO: how do you tune this?
   private final SimpleMotorFeedforward m_feedforward = new SimpleMotorFeedforward(1, 3);
 
+    //SysID
+      // Mutable holder for unit-safe voltage values, persisted to avoid reallocation.
+      private final MutableMeasure<Voltage> m_appliedVoltage = mutable(Volts.of(0));
+      // Mutable holder for unit-safe linear distance values, persisted to avoid reallocation.
+      private final MutableMeasure<Distance> m_distance = mutable(Meters.of(0));
+      // Mutable holder for unit-safe linear velocity values, persisted to avoid reallocation.
+      private final MutableMeasure<Velocity<Distance>> m_velocity = mutable(MetersPerSecond.of(0));
 
+      // Create a new SysId routine for characterizing the drive.
+      private final SysIdRoutine m_sysIdRoutine =
+          new SysIdRoutine(
+              // Empty config defaults to 1 volt/second ramp rate and 7 volt step voltage.
+              new SysIdRoutine.Config(),
+              new SysIdRoutine.Mechanism(
+                  // Tell SysId how to plumb the driving voltage to the motors.
+                  (Measure<Voltage> volts) -> {
+                    m_frontLeft.setVoltage(volts.in(Volts));
+                    m_rearLeft.setVoltage(volts.in(Volts));
+                    m_frontRight.setVoltage(volts.in(Volts));
+                    m_rearRight.setVoltage(volts.in(Volts));
+                  },
+                  // Tell SysId how to record a frame of data for each motor on the mechanism being
+                  // characterized.
+                  log -> {
+                    // Record a frame for the each motor
+                    log.motor("frontLeft")
+                        .voltage(
+                            m_appliedVoltage.mut_replace(
+                                m_frontLeft.get() * RobotController.getBatteryVoltage(), Volts))
+                        .linearPosition(m_distance.mut_replace(m_frontLeftEncoder.getDistance(), Meters))
+                        .linearVelocity(
+                            m_velocity.mut_replace(m_frontLeftEncoder.getRate(), MetersPerSecond));
+
+                    log.motor("frontRight")
+                        .voltage(
+                            m_appliedVoltage.mut_replace(
+                                m_frontRight.get() * RobotController.getBatteryVoltage(), Volts))
+                        .linearPosition(m_distance.mut_replace(m_frontRightEncoder.getDistance(), Meters))
+                        .linearVelocity(
+                            m_velocity.mut_replace(m_rearRightEncoder.getRate(), MetersPerSecond));
+
+                    log.motor("rearLeft")
+                        .voltage(
+                            m_appliedVoltage.mut_replace(
+                                m_rearLeft.get() * RobotController.getBatteryVoltage(), Volts))
+                        .linearPosition(m_distance.mut_replace(m_rearLeftEncoder.getDistance(), Meters))
+                        .linearVelocity(
+                            m_velocity.mut_replace(m_rearLeftEncoder.getRate(), MetersPerSecond));
+
+                    log.motor("rearRight")
+                        .voltage(
+                            m_appliedVoltage.mut_replace(
+                                m_rearRight.get() * RobotController.getBatteryVoltage(), Volts))
+                        .linearPosition(m_distance.mut_replace(m_rearRightEncoder.getDistance(), Meters))
+                        .linearVelocity(
+                            m_velocity.mut_replace(m_rearRightEncoder.getRate(), MetersPerSecond));
+                  },
+                  // Tell SysId to make generated commands require this subsystem, suffix test state in
+                  // WPILog with this subsystem's name ("drive")
+                  this));
 
 
   /** Constructor -- initialize values here */
@@ -286,7 +354,7 @@ public class Drivetrain extends SubsystemBase {
   public void periodic() {
 
     // Update the odometry in the periodic block
-    m_odometry.update(m_gyro.getRotation2d(), getCurrentWheelDistances());
+    m_odometry.update(m_gyro.getRotation2d().times(-1), getCurrentWheelDistances());
 
     // Update the field
     field.setRobotPose(getPose());
@@ -483,7 +551,7 @@ public class Drivetrain extends SubsystemBase {
     m_frontRight.setVoltage(frontRightOutput + frontRightFeedforward);
     m_rearLeft.setVoltage(backLeftOutput + backLeftFeedforward);
     m_rearRight.setVoltage(backRightOutput + backRightFeedforward);
-    log("Setting speeds FL: " + speeds.frontLeftMetersPerSecond + " FR: " + speeds.frontRightMetersPerSecond + " ...");
+    //log("Setting speeds FL: " + speeds.frontLeftMetersPerSecond + " FR: " + speeds.frontRightMetersPerSecond + " ...");
   }
 
 
@@ -567,60 +635,16 @@ public class Drivetrain extends SubsystemBase {
     headingEntry.setDouble(getHeading());
     turnRateEntry.setDouble(getTurnRate());
     fieldRelativeEntry.setBoolean(getFieldRelative());
-
-
-
-
-    
+   
   
   }
-/*
-  //SysID
 
   
-  // Create a new SysId routine for characterizing the drive.
-  private final SysIdRoutine m_sysIdRoutine =
-      new SysIdRoutine(
-          // Empty config defaults to 1 volt/second ramp rate and 7 volt step voltage.
-          new SysIdRoutine.Config(),
-          new SysIdRoutine.Mechanism(
-              // Tell SysId how to plumb the driving voltage to the motors.
-              (Measure<Voltage> volts) -> {
-                m_frontLeft.setVoltage(volts.in(Volts));
-                m_rearLeft.setVoltage(volts.in(Volts));
-                m_frontRight.setVoltage(volts.in(Volts));
-                m_rearRight.setVoltage(volts.in(Volts));
-              },
-              // Tell SysId how to record a frame of data for each motor on the mechanism being
-              // characterized.
-              log -> {
-                // Record a frame for the left motors.  Since these share an encoder, we consider
-                // the entire group to be one motor.
-                log.motor("drive-left")
-                    .voltage(
-                        m_appliedVoltage.mut_replace(
-                            m_leftMotor.get() * RobotController.getBatteryVoltage(), Volts))
-                    .linearPosition(m_distance.mut_replace(m_frontLeftEncoder.getDistance(), Meters))
-                    .linearVelocity(
-                        m_velocity.mut_replace(m_frontLeftEncoder.getRate(), MetersPerSecond));
-                // Record a frame for the right motors.  Since these share an encoder, we consider
-                // the entire group to be one motor.
-                log.motor("drive-right")
-                    .voltage(
-                        m_appliedVoltage.mut_replace(
-                            m_rightMotor.get() * RobotController.getBatteryVoltage(), Volts))
-                    .linearPosition(m_distance.mut_replace(m_frontRightEncoder.getDistance(), Meters))
-                    .linearVelocity(
-                        m_velocity.mut_replace(m_rearRightEncoder.getRate(), MetersPerSecond));
-              },
-              // Tell SysId to make generated commands require this subsystem, suffix test state in
-              // WPILog with this subsystem's name ("drive")
-              this));
-    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
     return m_sysIdRoutine.quasistatic(direction);
   }
 
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
     return m_sysIdRoutine.dynamic(direction);
-  }*/
+  }
 }
