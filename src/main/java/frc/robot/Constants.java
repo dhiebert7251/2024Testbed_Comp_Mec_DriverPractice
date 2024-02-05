@@ -216,6 +216,66 @@ public final class Constants {
 
   }
 
+  public static final class IntakeConstants {
+    //Intakemotor CAN Id
+    public static final int kIntakeMotor = 30;
+
+    //IntakeSensor 
+
+
+    //deploy motor CAN Id
+    public static final int kDeployMotor = 31;
+
+    //Intake limitSwitches
+    public static final int kIntakeLimitUp = 0;
+    public static final int kIntakeLimitDown = 1;
+
+    //reversed
+    public static final boolean kIntakeMotorReversed = false;
+    public static final boolean kDeployMotorReversed = false;
+
+
+  }
+
+  public static final class ShooterConstants {
+
+    //Left & right feed motors
+    public static final int kLeftFeedMotor = 40;
+    public static final int kRightFeedMotor = 41;
+
+    //Left & right shooting motors
+    public static final int kLeftShootingMotor = 42;
+    public static final int kRightShootingMotor = 43;
+
+    //Sensor
+
+
+    //Angle
+
+        //Motor
+
+        //Sensor
+
+    //reversed
+    public static final boolean kLeftFeedMotorReversed = false;
+    public static final boolean kRightFeedMotorReversed = false;
+    public static final boolean kLeftShootingMotorReversed = false;
+    public static final boolean kRightShootingMotorReversed = false;
+  }
+
+  public static final class ClimberConstants {
+
+    //Climber motor
+    public static final int kClimbingMotor = 50;
+
+    //Climber limit switches
+    public static final int kClimberLimitUp = 2;
+    public static final int kClimberLimitDown = 3;
+
+    //reversed
+    public static final boolean kClimbingMotorReversed = false;
+  }
+
   public static final class VisionConstants {
     public static final String kCameraName = "PhotonVision"; //TODO: update this
     public static final double kCameraHeight = 0.5; //meters TODO: update this

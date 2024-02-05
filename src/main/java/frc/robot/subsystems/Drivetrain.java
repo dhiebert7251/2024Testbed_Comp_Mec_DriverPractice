@@ -135,7 +135,7 @@ public class Drivetrain extends SubsystemBase {
           DriveConstants.kRearRightEncoderPorts[1],
           DriveConstants.kRearRightEncoderReversed);
 
-          
+   /*        
   // Wheel PID controllers
   private final PIDController m_TranslationPID =
       new PIDController(AutoConstants.kPTranslation,
@@ -146,7 +146,7 @@ public class Drivetrain extends SubsystemBase {
       AutoConstants.kIRotation,
       AutoConstants.kDRotation);
 
-   /* 
+   */
   private final PIDController m_frontLeftPIDController =
       new PIDController(PhysicalConstants.kPFrontLeft, 
                         PhysicalConstants.kIFrontLeft,
@@ -579,7 +579,7 @@ public void setRotationSetpoint(double rotationSpeed) {
     double averageTargetSpeed = (speeds.frontLeftMetersPerSecond + speeds.rearLeftMetersPerSecond + 
                                 speeds.frontRightMetersPerSecond + speeds.rearRightMetersPerSecond) / 4.0;
     // calculate PID output
-    double translateOutput = m_TranslationPID.calculate(averageCurrentSpeed, averageTargetSpeed);
+    double translateOutput = m_translationPID.calculate(averageCurrentSpeed, averageTargetSpeed);
 
 
     // Applie PID to all motors
