@@ -69,10 +69,10 @@ public final class Constants {
     public static final int[] kRearRightEncoderPorts = new int[] {6, 7};
 
     //Encoder inverse
-    public static final boolean kFrontLeftEncoderReversed = false;
+    public static final boolean kFrontLeftEncoderReversed = true;
     public static final boolean kRearLeftEncoderReversed = true;
     public static final boolean kFrontRightEncoderReversed = false;
-    public static final boolean kRearRightEncoderReversed = true;
+    public static final boolean kRearRightEncoderReversed = false;
 
     //Gyro inverse
     public static final boolean kGyroReversed = false;
@@ -102,7 +102,7 @@ public final class Constants {
             new Translation2d(-kWheelBase / 2, -kTrackWidth / 2));
 
     // Encoder CPR
-    public static final int kEncoderCPR = 80; //Testbed CIMCoder quadrature 2 channel 20 pulses per channel
+    public static final int kEncoderCPR = 20; //Testbed CIMCoder quadrature 2 channel 20 pulses per channel
     //public static final int kEncoderCPR = 42; //Neo integrated encoder
 
     // Gear ratio
