@@ -183,16 +183,22 @@ public final class Constants {
     // for *your* robot's drive.
     // The SysId tool provides a convenient method for obtaining these values for your robot.
     public static final SimpleMotorFeedforward kFeedforward =
-        new SimpleMotorFeedforward(1, 0.8, 0.15);
+        new SimpleMotorFeedforward(1.5893, 15.323, 4.224);
 
     // Example value only - as above, this must be tuned for your drive!
-    public static final double kPTranslation = 0.255;
+    public static final double kPTranslation = 64.456; 
+    //public static final double kPTranslation = 0.255;
     public static final double kITranslation = 0;
-    public static final double kDTranslation = 0;
+    public static final double kDTranslation = 31.613;
+    //public static final double kDTranslation = 0;
 
-    public static final double kPRotation = 0.5;
+
+    public static final double kPRotation =64.456;
+    //public static final double kPRotation = 0.5;
     public static final double kIRotation = 0;
-    public static final double kDRotation = 0;
+    public static final double kDRotation = 31.613;
+    //public static final double kDRotation = 0;
+
 
 
     // Constraint for the motion profilied robot angle controller
@@ -248,7 +254,7 @@ public final class Constants {
     public static final int kRightShootingMotor = 43;
 
     //Sensor
-
+    public static final int kLoadedSensor = 2;
 
     //Angle
 

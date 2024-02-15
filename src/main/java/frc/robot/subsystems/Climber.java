@@ -10,7 +10,6 @@ import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ClimberConstants;
-import frc.robot.Constants.IntakeConstants;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -35,6 +34,9 @@ public class Climber extends SubsystemBase {
     m_climbingMotor.setIdleMode(IdleMode.kBrake);
 
     m_climbingMotor.setInverted(ClimberConstants.kClimbingMotorReversed);
+  //Shuffleboard
+    climberLimitDown=climberTab.add("climber down",0).withWidget("Boolean Box").withSize(1,1).getEntry();
+    climberLimitUp=climberTab.add("climber up",0).withWidget("Boolean Box").withSize(1,1).getEntry();
   }
 
   @Override
@@ -42,4 +44,11 @@ public class Climber extends SubsystemBase {
     // This method will be called once per scheduler run
     showClimberTelemetry();
   }
+
+  public void showClimberTelemetry(){
+    climberLimitUp.setBoolean(m_climberLimitUp.get());
+    climberLimitDown.setBoolean(m_climberLimitDown.get());
+  }
+
 }
+
