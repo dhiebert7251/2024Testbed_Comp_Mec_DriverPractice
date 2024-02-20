@@ -54,7 +54,11 @@ public class Intake extends SubsystemBase {
     // This method will be called once per scheduler run
     showIntakeTelemetry();
   }
+
+
+
   public void showIntakeTelemetry(){
-    intakeLimitUp.setBoolean(m_limitUp);
+    intakeLimitUp.setBoolean(m_limitUp.get());
+    intakeLimitDown.setBoolean(m_limitDown.get());
   }
 }

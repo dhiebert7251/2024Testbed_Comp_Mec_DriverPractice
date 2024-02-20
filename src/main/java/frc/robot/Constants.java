@@ -69,10 +69,10 @@ public final class Constants {
     public static final int[] kRearRightEncoderPorts = new int[] {6, 7};
 
     //Encoder inverse
-    public static final boolean kFrontLeftEncoderReversed = false;
+    public static final boolean kFrontLeftEncoderReversed = true;
     public static final boolean kRearLeftEncoderReversed = true;
     public static final boolean kFrontRightEncoderReversed = false;
-    public static final boolean kRearRightEncoderReversed = true;
+    public static final boolean kRearRightEncoderReversed = false;
 
     //Gyro inverse
     public static final boolean kGyroReversed = false;
@@ -101,8 +101,8 @@ public final class Constants {
             new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
             new Translation2d(-kWheelBase / 2, -kTrackWidth / 2));
 
-    // Encoder CPR
-    public static final int kEncoderCPR = 80; //Testbed CIMCoder quadrature 2 channel 20 pulses per channel
+    // Encoder CPR.
+    public static final int kEncoderCPR = 20; //Testbed CIMCoder quadrature 2 channel 20 pulses per channel
     //public static final int kEncoderCPR = 42; //Neo integrated encoder
 
     // Gear ratio
@@ -183,16 +183,22 @@ public final class Constants {
     // for *your* robot's drive.
     // The SysId tool provides a convenient method for obtaining these values for your robot.
     public static final SimpleMotorFeedforward kFeedforward =
-        new SimpleMotorFeedforward(1, 0.8, 0.15);
+        new SimpleMotorFeedforward(1.5893, 15.323, 4.224);
 
     // Example value only - as above, this must be tuned for your drive!
-    public static final double kPTranslation = 0.255;
+    public static final double kPTranslation = 64.456; 
+    //public static final double kPTranslation = 0.255;
     public static final double kITranslation = 0;
-    public static final double kDTranslation = 0;
+    public static final double kDTranslation = 31.613;
+    //public static final double kDTranslation = 0;
 
-    public static final double kPRotation = 0.5;
+
+    public static final double kPRotation =64.456;
+    //public static final double kPRotation = 0.5;
     public static final double kIRotation = 0;
-    public static final double kDRotation = 0;
+    public static final double kDRotation = 31.613;
+    //public static final double kDRotation = 0;
+
 
 
     // Constraint for the motion profilied robot angle controller
@@ -248,7 +254,7 @@ public final class Constants {
     public static final int kRightShootingMotor = 43;
 
     //Sensor
-
+    public static final int kLoadedSensor = 2;
 
     //Angle
 

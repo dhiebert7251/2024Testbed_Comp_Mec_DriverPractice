@@ -5,10 +5,10 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.ShooterConstants;
 
 import com.revrobotics.CANSparkMax;
@@ -24,13 +24,15 @@ public class Shooter extends SubsystemBase {
   private final CANSparkMax m_rightShootingMotor = new CANSparkMax (ShooterConstants.kRightShootingMotor,MotorType.kBrushed);
 
   //declare sensor
-
+  private final DigitalInput m_loadedSensor=new DigitalInput(ShooterConstants.kLoadedSensor);
   //declare angle
           //motor
           //sensor
 
   //Shuffleboard
   private final ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
+  private GenericEntry loadedEntry;
+
   /** Creates a new Shooter. */
   public Shooter() {
 
@@ -50,12 +52,19 @@ public class Shooter extends SubsystemBase {
     m_rightShootingMotor.setInverted(ShooterConstants.kRightShootingMotorReversed);
 
     //Shuffleboard
-    shooterLeftFeed = shooterTab.add("Shooter left feed",0).withWidget("Boolean Box").withSize(1,1).getEntry();
+    loadedEntry = shooterTab.add("Shooter Loaded",0).withWidget("Boolean Box").withSize(1,1).getEntry();
+    
+
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
     showShooterTelemetry();
+  }
+
+
+  public void showShooterTelemetry(){
+    loadedEntry.setBoolean(m_loadedSensor.get());
   }
 }
