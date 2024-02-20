@@ -101,7 +101,7 @@ public final class Constants {
             new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
             new Translation2d(-kWheelBase / 2, -kTrackWidth / 2));
 
-    // Encoder CPR
+    // Encoder CPR.
     public static final int kEncoderCPR = 20; //Testbed CIMCoder quadrature 2 channel 20 pulses per channel
     //public static final int kEncoderCPR = 42; //Neo integrated encoder
 
